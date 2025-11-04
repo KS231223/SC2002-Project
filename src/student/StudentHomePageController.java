@@ -2,7 +2,6 @@ package student;
 
 import common.*;
 import exceptions.*;
-import ims.*;
 import java.util.Scanner;
 
 public class StudentHomePageController extends StudentController {
@@ -30,8 +29,8 @@ public class StudentHomePageController extends StudentController {
             try {
                 switch (choice) {
                     case "1" -> new ViewInternshipController(router, scanner, studentID);
-                    case "2" -> System.out.println("Update internship filters – to be implemented.");
-                    case "3" -> System.out.println("Clear internship filters – to be implemented.");
+                    case "2" -> new UpdateInternshipFiltersController(router, scanner, studentID);
+                    case "3" -> handleClearFilters();
                     case "4" -> new ApplyInternshipController(router, scanner, studentID);
                     case "5" -> new ViewApplicationsController(router, scanner, studentID);
                     case "6" -> new WithdrawalRequestController(router, scanner, studentID);
@@ -72,6 +71,15 @@ public class StudentHomePageController extends StudentController {
             System.out.println("8. Change password");
             System.out.println("9. Logout");
             System.out.print("Select an option: ");
+        }
+    }
+
+    private void handleClearFilters() {
+        try {
+            StudentFilterService.clearFilters(studentID);
+            System.out.println("Internship filters cleared. Listings will default to alphabetical order.");
+        } catch (IllegalArgumentException ex) {
+            System.out.println("Unable to clear filters: " + ex.getMessage());
         }
     }
 }

@@ -9,8 +9,6 @@ public class AcceptOfferController extends StudentController {
     private AcceptOfferDisplay display;
     private static final String APPLICATION_FILE =
         PathResolver.resource("internship_applications.csv");
-    private static final String STUDENT_FILE =
-        PathResolver.resource("student.csv");
 
     public AcceptOfferController(Router router, Scanner scanner, String studentID) throws InvalidStudentIDException {
         super(router, scanner, studentID);
@@ -20,9 +18,11 @@ public class AcceptOfferController extends StudentController {
 
     @Override
     public void initialize() {
-        Entity thisStudent = DatabaseManager.getEntryById(STUDENT_FILE,userID,"Student");
-        if(thisStudent.equals(null)){
+        StudentEntity thisStudent = StudentFilterService.loadStudent(studentID);
+        if (thisStudent == null) {
             System.err.println("This student does not exist");
+            router.pop();
+            return;
         }
         List<Entity> applications = DatabaseManager.getDatabase(APPLICATION_FILE, new ArrayList<>(), "Application");
         List<Entity> offers = new ArrayList<>();
@@ -52,8 +52,9 @@ public class AcceptOfferController extends StudentController {
         // Update status
         offer.setArrayValueByIndex(3,"Accepted");
         DatabaseManager.updateEntry(APPLICATION_FILE, appId, offer, "Application");
-        thisStudent.setArrayValueByIndex(8,offer.getArrayValueByIndex(2));
-        DatabaseManager.updateEntry(STUDENT_FILE,userID,thisStudent,"Student");
+        thisStudent.set(StudentEntity.StudentField.AcceptedInternshipID, offer.getArrayValueByIndex(2));
+        StudentFilterService.saveStudent(thisStudent);
+        this.acceptedInternshipID = offer.getArrayValueByIndex(2);
         System.out.println("Offer accepted successfully!");
         router.pop();
     }

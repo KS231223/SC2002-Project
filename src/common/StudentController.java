@@ -1,9 +1,6 @@
 package common;
 
 import exceptions.*;
-import java.io.File;
-import java.io.IOException;
-import java.util.Scanner;
 
 public abstract class StudentController extends UserController {
 
@@ -15,43 +12,24 @@ public abstract class StudentController extends UserController {
     protected String acceptedInternshipID;
 
     // Constructor that loads student details based on UID
-    public StudentController(Router router,Scanner scanner, String studentID) throws InvalidStudentIDException {
-        super(router,scanner,studentID);
+    public StudentController(Router router, java.util.Scanner scanner, String studentID) throws InvalidStudentIDException {
+        super(router, scanner, studentID);
         this.studentID = studentID;
 
-        // Load student details from CSV
-    File file = new File(PathResolver.resource("student.csv"));
-        boolean found = false;
-
-        if (!file.exists()) {
-            throw new InvalidStudentIDException("Student database not found.");
-        }
-
-        try (Scanner reader = new Scanner(file)) {
-            while (reader.hasNextLine()) {
-                String line = reader.nextLine().trim();
-                if (line.isEmpty()) continue;
-
-                String[] parts = line.split(","); // StudentID,Name,Major,Year,Email,Accepted InternshipID
-                if (parts.length < 5) continue;
-
-                if (parts[0].equals(studentID)) {
-                    this.name = parts[1];
-                    this.major = parts[2];
-                    this.year = Integer.parseInt(parts[3]);
-                    this.email = parts[4];
-                    this.acceptedInternshipID = (parts.length > 5) ? parts[5] : "";
-                    found = true;
-                    break;
-                }
-            }
-        } catch (IOException e) {
-            throw new InvalidStudentIDException("Error reading students.csv: " + e.getMessage());
-        }
-
-        if (!found) {
+        StudentEntity student = StudentFilterService.loadStudent(studentID);
+        if (student == null) {
             throw new InvalidStudentIDException("Invalid student ID: " + studentID);
         }
+
+        this.name = student.get(StudentEntity.StudentField.Name);
+        this.major = student.get(StudentEntity.StudentField.Major);
+        try {
+            this.year = Integer.parseInt(student.get(StudentEntity.StudentField.Year));
+        } catch (NumberFormatException ex) {
+            throw new InvalidStudentIDException("Invalid year data for student: " + studentID);
+        }
+        this.email = student.get(StudentEntity.StudentField.Email);
+        this.acceptedInternshipID = student.get(StudentEntity.StudentField.AcceptedInternshipID);
     }
 
     // Abstract initialize method from Controller
