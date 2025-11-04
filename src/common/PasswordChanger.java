@@ -1,8 +1,8 @@
 package common;
 
+import exceptions.*;
 import java.io.*;
 import java.util.*;
-import exceptions.*;
 
 public class PasswordChanger extends Controller {
 
@@ -37,7 +37,7 @@ public class PasswordChanger extends Controller {
 
     // Backend logic for changing password
     private void changePassword(String newPassword) throws IOException, InvalidUserIDException {
-        File file = new File("resources/users.csv");
+        File file = new File(PathResolver.resource("users.csv"));
         if (!file.exists()) {
             throw new IOException("User database not found.");
         }

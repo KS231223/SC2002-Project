@@ -37,7 +37,7 @@ public class ReviewWithdrawalController extends Controller {
         display.print_entry(withdrawalEntity);
         String choice = display.get_user_input().trim().toUpperCase();
 
-        if (choice.equals("A")) handleApprovedWithdrawal(withdrawalId);
+        if (choice.equals("A")) ApplicationHandler.withdrawApplication(withdrawalId);
         if (choice.equals("A") || choice.equals("R"))
             DatabaseManager.deleteEntry(PENDING_WITHDRAWAL_FILE, withdrawalId, "Application");
 
