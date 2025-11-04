@@ -1,16 +1,17 @@
 package ims;
 
 import common.*;
+import cr.*;
+import exceptions.*;
 import java.io.*;
 import java.util.*;
-import cr.*;
 import staff.*;
 import student.*;
-import exceptions.*;
 
 public class LoginController extends Controller {
     private Display loginDisplay;
-    private static final String USER_DB_PATH = "resources/users.csv";
+    private static final String USER_DB_PATH =
+        PathResolver.resource("users.csv");
 
     public LoginController(Router router, Scanner scanner) {
         super(router, scanner);

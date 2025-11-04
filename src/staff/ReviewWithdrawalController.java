@@ -5,7 +5,10 @@ import java.util.*;
 
 public class ReviewWithdrawalController extends Controller {
     ReviewWithdrawalDisplay display;
-    String filePath = "resources/pending_withdrawal.csv";
+    private static final String PENDING_WITHDRAWAL_FILE =
+        PathResolver.resource("pending_withdrawal.csv");
+    private static final String APPLICATION_FILE =
+        PathResolver.resource("internship_applications.csv");
 
     public ReviewWithdrawalController(Router router, Scanner scanner, String staffID) {
         super(router, scanner);
@@ -14,7 +17,7 @@ public class ReviewWithdrawalController extends Controller {
     }
 
     public void initialize() {
-        List<Entity> pending = DatabaseManager.getDatabase(filePath, new ArrayList<>(), "Application");
+    List<Entity> pending = DatabaseManager.getDatabase(PENDING_WITHDRAWAL_FILE, new ArrayList<>(), "Application");
         if (pending.isEmpty()) {
             System.out.println("No pending withdrawals.");
             router.pop();
@@ -23,7 +26,7 @@ public class ReviewWithdrawalController extends Controller {
         display.print_menu();
         display.print_list(pending);
         String withdrawalId = display.get_user_input().trim();
-        Entity withdrawalEntity = DatabaseManager.getEntryById(filePath, withdrawalId, "Application");
+    Entity withdrawalEntity = DatabaseManager.getEntryById(PENDING_WITHDRAWAL_FILE, withdrawalId, "Application");
 
         if (withdrawalEntity == null) {
             System.out.println("Invalid ID. Returning to previous menu.");
@@ -36,14 +39,14 @@ public class ReviewWithdrawalController extends Controller {
 
         if (choice.equals("A")) handleApprovedWithdrawal(withdrawalId);
         if (choice.equals("A") || choice.equals("R"))
-            DatabaseManager.deleteEntry(filePath, withdrawalId, "Application");
+            DatabaseManager.deleteEntry(PENDING_WITHDRAWAL_FILE, withdrawalId, "Application");
 
         System.out.println("\nWithdrawal review complete.");
         router.pop();
     }
 
     private void handleApprovedWithdrawal(String appId) {
-        Entity application = DatabaseManager.getEntryById("resources/internship_applications.csv", appId, "Application");
+    Entity application = DatabaseManager.getEntryById(APPLICATION_FILE, appId, "Application");
 
         if (application == null) {
             System.out.println("No such application found (unexpected).");
@@ -56,7 +59,7 @@ public class ReviewWithdrawalController extends Controller {
         }
 
         application.setArrayValueByIndex(statusKey,"WITHDRAWN");
-        DatabaseManager.updateEntry("resources/internship_applications.csv", appId, application, "Application");
+    DatabaseManager.updateEntry(APPLICATION_FILE, appId, application, "Application");
         System.out.println("Application marked as WITHDRAWN.");
     }
 }

@@ -1,15 +1,16 @@
 package student;
 
 import common.*;
-import ims.*;
 import exceptions.*;
 import java.util.*;
 
 public class WithdrawalRequestController extends StudentController {
 
     private WithdrawalDisplay display;
-    private static final String APPLICATION_FILE = "resources/internship_applications.csv";
-    private static final String WITHDRAWAL_FILE = "resources/pending_withdrawal.csv";
+    private static final String APPLICATION_FILE =
+        PathResolver.resource("internship_applications.csv");
+    private static final String WITHDRAWAL_FILE =
+        PathResolver.resource("pending_withdrawal.csv");
 
     public WithdrawalRequestController(Router router, Scanner scanner, String studentID) throws InvalidStudentIDException {
         super(router, scanner, studentID);

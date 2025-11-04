@@ -2,17 +2,17 @@ package cr;
 
 import common.*;
 import exceptions.InvalidCompanyRepIDException;
-import ims.*;
-
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.time.LocalDate;
 
 
 public class CreateInternshipController extends CRController {
 
-    private static final String INTERNSHIP_FILE = "resources/internship_opportunities.csv";
-    private static final String CR_FILE = "resources/cr.csv";
+    private static final String INTERNSHIP_FILE =
+        PathResolver.resource("internship_opportunities.csv");
+    private static final String CR_FILE =
+        PathResolver.resource("cr.csv");
     private CreateInternshipDisplay display;
 
     public CreateInternshipController(Router router, Scanner scanner, String crID) throws InvalidCompanyRepIDException {

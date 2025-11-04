@@ -1,18 +1,20 @@
 package student;
 
 import common.*;
-import ims.*;
 import exceptions.*;
-import java.util.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 public class ApplyInternshipController extends StudentController {
 
     private ApplyInternshipDisplay display;
-    private static final String INTERNSHIP_FILE = "resources/internship_opportunities.csv";
-    private static final String APPLICATION_FILE = "resources/internship_applications.csv";
-    private static final String STUDENT_FILE = "resources/student.csv";
+    private static final String INTERNSHIP_FILE =
+        PathResolver.resource("internship_opportunities.csv");
+    private static final String APPLICATION_FILE =
+        PathResolver.resource("internship_applications.csv");
+    private static final String STUDENT_FILE =
+        PathResolver.resource("student.csv");
 
     public ApplyInternshipController(Router router, Scanner scanner, String studentID) throws InvalidStudentIDException {
         super(router, scanner, studentID);

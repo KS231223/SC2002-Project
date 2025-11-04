@@ -1,13 +1,16 @@
 package staff;
 
 import common.*;
-
-import javax.xml.crypto.Data;
 import java.util.*;
 
 public class ReviewRegistrationController extends Controller {
     ReviewRegistrationDisplay display;
-    String filePath = "resources/pending_cr.csv";
+    private static final String PENDING_CR_FILE =
+        PathResolver.resource("pending_cr.csv");
+    private static final String CR_FILE =
+        PathResolver.resource("cr.csv");
+    private static final String USER_FILE =
+        PathResolver.resource("users.csv");
     public ReviewRegistrationController(Router router, Scanner scanner, String staffID) {
         super(router, scanner);
         display = new ReviewRegistrationDisplay(this);
@@ -15,7 +18,7 @@ public class ReviewRegistrationController extends Controller {
     }
 
     public void initialize() {
-        List<Entity> pending = DatabaseManager.getDatabase(filePath, new ArrayList<>(), "CR");
+    List<Entity> pending = DatabaseManager.getDatabase(PENDING_CR_FILE, new ArrayList<>(), "CR");
         if (pending.isEmpty()) {
             System.out.println("No pending registrations.");
             router.pop();
@@ -23,7 +26,7 @@ public class ReviewRegistrationController extends Controller {
         }
         display.print_list(pending);
         String CRId = display.get_user_input().trim();
-        Entity crEntityToDelete = DatabaseManager.getEntryById(filePath, CRId, "CR" );
+    Entity crEntityToDelete = DatabaseManager.getEntryById(PENDING_CR_FILE, CRId, "CR" );
 
         if (crEntityToDelete == null) {
             System.out.println("Invalid ID. Returning to previous menu.");
@@ -36,11 +39,11 @@ public class ReviewRegistrationController extends Controller {
         String choice = display.get_user_input().trim().toUpperCase();
 
         if (choice.equals("A")) {
-            DatabaseManager.appendEntry("resources/cr.csv", crEntityToDelete);
-            DatabaseManager.appendEntry("resources/users.csv", userEntityToAppend);
+            DatabaseManager.appendEntry(CR_FILE, crEntityToDelete);
+            DatabaseManager.appendEntry(USER_FILE, userEntityToAppend);
         }
         if (choice.equals("A") || choice.equals("R")){
-            DatabaseManager.deleteEntry("resources/pending_cr.csv", CRId, "CR");
+            DatabaseManager.deleteEntry(PENDING_CR_FILE, CRId, "CR");
         }
         System.out.println("\nReview complete.");
         router.pop();

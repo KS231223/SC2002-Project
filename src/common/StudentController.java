@@ -1,9 +1,9 @@
 package common;
 
+import exceptions.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.Scanner;
-import exceptions.*;
 
 public abstract class StudentController extends UserController {
 
@@ -20,7 +20,7 @@ public abstract class StudentController extends UserController {
         this.studentID = studentID;
 
         // Load student details from CSV
-        File file = new File("resources/student.csv");
+    File file = new File(PathResolver.resource("student.csv"));
         boolean found = false;
 
         if (!file.exists()) {

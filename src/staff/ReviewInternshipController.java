@@ -5,7 +5,10 @@ import java.util.*;
 
 public class ReviewInternshipController extends Controller {
     ReviewInternshipDisplay display;
-    String filePath = "resources/pending_internship_opportunities.csv";
+    private static final String PENDING_INTERNSHIP_FILE =
+        PathResolver.resource("pending_internship_opportunities.csv");
+    private static final String INTERNSHIP_FILE =
+        PathResolver.resource("internship_opportunities.csv");
 
     public ReviewInternshipController(Router router, Scanner scanner, String staffID) {
         super(router, scanner);
@@ -14,7 +17,7 @@ public class ReviewInternshipController extends Controller {
     }
 
     public void initialize() {
-        List<Entity> pending = DatabaseManager.getDatabase(filePath, new ArrayList<>(), "Internship");
+    List<Entity> pending = DatabaseManager.getDatabase(PENDING_INTERNSHIP_FILE, new ArrayList<>(), "Internship");
         if (pending.isEmpty()) {
             System.out.println("No pending internships.");
             router.pop();
@@ -23,7 +26,7 @@ public class ReviewInternshipController extends Controller {
         display.print_menu();
         display.print_list(pending);
         String internshipId = display.get_user_input().trim();
-        Entity internshipEntity = DatabaseManager.getEntryById(filePath, internshipId, "Internship");
+    Entity internshipEntity = DatabaseManager.getEntryById(PENDING_INTERNSHIP_FILE, internshipId, "Internship");
 
         if (internshipEntity == null) {
             System.out.println("Invalid ID. Returning to previous menu.");
@@ -34,9 +37,9 @@ public class ReviewInternshipController extends Controller {
         display.print_entry(internshipEntity);
         String choice = display.get_user_input().trim().toUpperCase();
 
-        if (choice.equals("A")) DatabaseManager.appendEntry("resources/internship_opportunities.csv", internshipEntity);
+        if (choice.equals("A")) DatabaseManager.appendEntry(INTERNSHIP_FILE, internshipEntity);
         if (choice.equals("A") || choice.equals("R"))
-            DatabaseManager.deleteEntry(filePath, internshipId, "Internship");
+            DatabaseManager.deleteEntry(PENDING_INTERNSHIP_FILE, internshipId, "Internship");
 
         System.out.println("\nReview complete.");
         router.pop();

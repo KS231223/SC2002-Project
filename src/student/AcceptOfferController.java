@@ -1,15 +1,16 @@
 package student;
 
 import common.*;
-import ims.*;
 import exceptions.*;
 import java.util.*;
 
 public class AcceptOfferController extends StudentController {
 
     private AcceptOfferDisplay display;
-    private static final String APPLICATION_FILE = "resources/internship_applications.csv";
-    private static final String STUDENT_FILE = "resources/student.csv";
+    private static final String APPLICATION_FILE =
+        PathResolver.resource("internship_applications.csv");
+    private static final String STUDENT_FILE =
+        PathResolver.resource("student.csv");
 
     public AcceptOfferController(Router router, Scanner scanner, String studentID) throws InvalidStudentIDException {
         super(router, scanner, studentID);

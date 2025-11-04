@@ -1,14 +1,14 @@
 package student;
 
 import common.*;
-import ims.*;
 import exceptions.*;
 import java.util.*;
 
 public class ViewApplicationsController extends StudentController {
 
     private ViewApplicationsDisplay display;
-    private static final String APPLICATION_FILE = "resources/internship_applications.csv";
+    private static final String APPLICATION_FILE =
+        PathResolver.resource("internship_applications.csv");
 
     public ViewApplicationsController(Router router, Scanner scanner, String studentID) throws InvalidStudentIDException {
         super(router, scanner, studentID);

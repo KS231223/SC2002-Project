@@ -1,13 +1,13 @@
 package cr;
 
 import common.*;
-import ims.*;
-import java.util.*;
 import exceptions.*;
+import java.util.*;
 
 public class ToggleVisibilityController extends CRController {
 
-    private static final String INTERNSHIP_FILE = "resources/internship_opportunities.csv";
+    private static final String INTERNSHIP_FILE =
+        PathResolver.resource("internship_opportunities.csv");
     private ToggleVisibilityDisplay display;
 
     public ToggleVisibilityController(Router router, Scanner scanner, String crID) throws InvalidCompanyRepIDException {

@@ -2,13 +2,14 @@ package cr;
 
 import common.*;
 import exceptions.InvalidCompanyRepIDException;
-import ims.*;
 import java.util.*;
 
 public class ViewApplicationsController extends CRController {
 
-    private static final String APPLICATION_FILE = "resources/internship_applications.csv";
-    private static final String INTERNSHIP_FILE = "resources/internship_opportunities.csv";
+    private static final String APPLICATION_FILE =
+        PathResolver.resource("internship_applications.csv");
+    private static final String INTERNSHIP_FILE =
+        PathResolver.resource("internship_opportunities.csv");
     private ViewApplicationsDisplay display;
 
     public ViewApplicationsController(Router router, Scanner scanner, String crID) throws InvalidCompanyRepIDException {

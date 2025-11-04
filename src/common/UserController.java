@@ -1,9 +1,9 @@
 package common;
 
+import exceptions.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.Scanner;
-import exceptions.*;
 
 public abstract class UserController extends Controller {
 
@@ -15,7 +15,7 @@ public abstract class UserController extends Controller {
         super(router,scanner);
         this.userID = userID;
 
-        File file = new File("resources/users.csv");
+    File file = new File(PathResolver.resource("users.csv"));
         boolean found = false;
 
         if (!file.exists()) {

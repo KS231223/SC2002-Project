@@ -1,14 +1,11 @@
 package ims;
 import common.*;
-import java.io.*;
 import java.util.*;
-import cr.*;
-import staff.*;
-import student.*;
-import exceptions.*;
 
 public class RegistrationController extends Controller {
     Display registrationDisplay;
+    private static final String PENDING_CR_FILE =
+        PathResolver.resource("pending_cr.csv");
 
     public RegistrationController(Router router, Scanner scanner) {
         super(router, scanner);
@@ -33,7 +30,7 @@ public class RegistrationController extends Controller {
             CREntity newCR = new CREntity(companyEmail, password, fullName, companyName, department, position, companyEmail);
 
             // Save to pending_cr.csv via DatabaseManager
-            DatabaseManager.appendEntry("resources/pending_cr.csv", newCR);
+            DatabaseManager.appendEntry(PENDING_CR_FILE, newCR);
 
             System.out.println("\nRegistration submitted successfully! Await approval.");
         } catch (Exception e) {
