@@ -13,6 +13,8 @@ public class CreateInternshipController extends CRController {
         PathResolver.resource("internship_opportunities.csv");
     private static final String CR_FILE =
         PathResolver.resource("cr.csv");
+    private static final String PENDING_INTERNSHIP_FILE =
+        PathResolver.resource("pending_internship_opportunities.csv");
     private CreateInternshipDisplay display;
 
     public CreateInternshipController(Router router, Scanner scanner, String crID) throws InvalidCompanyRepIDException {
@@ -71,7 +73,7 @@ public class CreateInternshipController extends CRController {
             InternshipEntity newInternship = new InternshipEntity(id, title, desc, level, major,
                     openDate, closeDate.toString(), status, companyName, userID, slots, visibility);
 
-            DatabaseManager.appendEntry(INTERNSHIP_FILE, newInternship);
+            DatabaseManager.appendEntry(PENDING_INTERNSHIP_FILE, newInternship);
             System.out.println("Internship successfully created!");
         } catch (Exception e) {
             System.err.println("Error creating internship: " + e.getMessage());

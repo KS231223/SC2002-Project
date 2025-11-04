@@ -8,6 +8,8 @@ public class ReviewApplicationController extends CRController {
     private final ReviewApplicationDisplay display;
     private static final String APPLICATION_FILE =
         PathResolver.resource("internship_applications.csv");
+    private static final String INTERNSHIP_FILE =
+        PathResolver.resource("internship_opportunities.csv");
 
     public ReviewApplicationController(Router router, Scanner scanner, String crID) throws InvalidCompanyRepIDException {
         super(router, scanner, crID);
@@ -30,8 +32,8 @@ public class ReviewApplicationController extends CRController {
 
         String applicationId = display.get_user_input().trim();
         Entity application = DatabaseManager.getEntryById(APPLICATION_FILE, applicationId, "Application");
-
-        if (application == null || !application.getArrayValueByIndex(9).equals(userID)) {
+        Entity internshipToCheck  = DatabaseManager.getEntryById(INTERNSHIP_FILE, application.getArrayValueByIndex(2), "Internship");
+        if (application == null || !internshipToCheck.getArrayValueByIndex(9).equals(userID)) {
             System.out.println("Invalid Application ID. Returning to previous menu.");
             router.pop();
             return;
@@ -42,9 +44,8 @@ public class ReviewApplicationController extends CRController {
 
         try {
             if (choice.equals("A")) {
-                application.setArrayValueByIndex(3, "Approved");
-                DatabaseManager.updateEntry(APPLICATION_FILE, applicationId, application, "Application");
-                System.out.println("Application approved successfully.");
+                ApplicationHandler.approveApplication(applicationId);
+
             }
             else if (choice.equals("R")) {
                 application.setArrayValueByIndex(3, "Rejected");

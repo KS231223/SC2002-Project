@@ -33,6 +33,7 @@ public class Router {
         controllerStack.push(controller);
         System.out.println(controllerStack);
         controller.initialize();
+        this.pop();
     }
 
     /**

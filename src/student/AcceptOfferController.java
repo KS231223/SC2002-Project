@@ -50,10 +50,12 @@ public class AcceptOfferController extends StudentController {
         }
 
         // Update status
-        offer.setArrayValueByIndex(3,"Accepted");
-        DatabaseManager.updateEntry(APPLICATION_FILE, appId, offer, "Application");
-        thisStudent.setArrayValueByIndex(8,offer.getArrayValueByIndex(2));
-        DatabaseManager.updateEntry(STUDENT_FILE,userID,thisStudent,"Student");
+        ApplicationHandler.acceptApplication(appId);
+        offers.remove(offer);
+        for(Entity e : offers){
+            ApplicationHandler.acceptApplication(e.getArrayValueByIndex(0));
+        }
+
         System.out.println("Offer accepted successfully!");
         router.pop();
     }

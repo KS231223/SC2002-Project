@@ -85,7 +85,6 @@ public class LoginController extends Controller {
 
     private void destroy() {
         System.out.println("\nReturning to main menu...\n");
-        router.pop();
     }
 }
 
