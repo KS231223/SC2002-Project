@@ -29,3 +29,5 @@ bin/
 .DS_Store
 .sources.txt
 .TestScenarioMain.java
+src/ims/StaffIntensiveScenarioMain.java
+src/ims/CRIntensiveScenarioMain.java

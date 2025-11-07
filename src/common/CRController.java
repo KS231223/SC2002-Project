@@ -1,9 +1,9 @@
 package common;
 
+import exceptions.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.Scanner;
-import exceptions.*;
 
 
 public abstract class CRController extends UserController {

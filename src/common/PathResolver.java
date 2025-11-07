@@ -23,13 +23,34 @@ public final class PathResolver {
 
     private static Path locateProjectRoot() {
         Path cwd = Paths.get("").toAbsolutePath();
-        if (Files.isDirectory(cwd.resolve("resources"))) {
-            return cwd;
+        Path candidate = findWithProjectStructure(cwd);
+        if (candidate != null) {
+            return candidate;
         }
-        Path projectDir = cwd.resolve("SC2002-Project");
-        if (Files.isDirectory(projectDir.resolve("resources"))) {
-            return projectDir;
+        Path namedChild = cwd.resolve("SC2002-Project");
+        candidate = findWithProjectStructure(namedChild);
+        if (candidate != null) {
+            return candidate;
+        }
+        Path current = cwd;
+        while ((current = current.getParent()) != null) {
+            candidate = findWithProjectStructure(current);
+            if (candidate != null) {
+                return candidate;
+            }
         }
         return cwd;
+    }
+
+    private static Path findWithProjectStructure(Path dir) {
+        if (dir == null) {
+            return null;
+        }
+        Path resourcesDir = dir.resolve("resources");
+        Path srcDir = dir.resolve("src");
+        if (Files.isDirectory(resourcesDir) && Files.isDirectory(srcDir)) {
+            return dir;
+        }
+        return null;
     }
 }
