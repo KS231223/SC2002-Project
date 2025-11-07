@@ -21,7 +21,7 @@ public abstract class CRController extends UserController {
         this.companyRepID = companyRepID;
 
         // Load company rep details from CSV
-        File file = new File("resources/cr.csv");
+    File file = new File(PathResolver.resource("cr.csv"));
         boolean found = false;
 
         if (!file.exists()) {

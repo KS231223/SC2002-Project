@@ -20,18 +20,27 @@ public class ListMyInternshipsController extends CRController {
     public void initialize() {
         try {
             List<Entity> allInternships = DatabaseManager.getDatabase(INTERNSHIP_FILE, new ArrayList<>(), "Internship");
-            List<Entity> myInternships = new ArrayList<>();
+            CRFilterService.CRFilters filters = CRFilterService.getFilters(userID);
+            List<InternshipEntity> filteredInternships = new ArrayList<>();
 
-            for (Entity e : allInternships) {
-                if (e.getArrayValueByIndex(9).equals(userID)) { // CRInCharge column
-                    myInternships.add(e);
+            for (Entity entity : allInternships) {
+                InternshipEntity internship = (InternshipEntity) entity;
+                if (userID.equals(internship.get(InternshipEntity.InternshipField.CRInCharge))
+                        && CRFilterService.matchesInternship(internship, filters)) {
+                    filteredInternships.add(internship);
                 }
             }
 
-            if (myInternships.isEmpty()) {
-                System.out.println("You currently have no internships listed.");
+            System.out.println("Active filters: " + filters.summary());
+
+            if (filteredInternships.isEmpty()) {
+                if (filters.hasActiveFilters()) {
+                    System.out.println("No internships match the current filters.");
+                } else {
+                    System.out.println("You currently have no internships listed.");
+                }
             } else {
-                display.print_list(myInternships);
+                display.print_list(filteredInternships);
             }
         } catch (Exception e) {
             System.err.println("Error displaying internships: " + e.getMessage());
@@ -46,7 +55,7 @@ class ListMyInternshipsDisplay extends Display {
         super(owner);
     }
 
-    public void print_list(List<Entity> internships) {
+    public void print_list(List<? extends Entity> internships) {
         System.out.println("=== Your Internships ===");
         for (Entity e : internships) {
             System.out.println(e.toString());

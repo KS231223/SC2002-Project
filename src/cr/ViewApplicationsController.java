@@ -23,23 +23,33 @@ public class ViewApplicationsController extends CRController {
         try {
             List<Entity> apps = DatabaseManager.getDatabase(APPLICATION_FILE, new ArrayList<>(), "Application");
             List<Entity> internships = DatabaseManager.getDatabase(INTERNSHIP_FILE, new ArrayList<>(), "Internship");
+            CRFilterService.CRFilters filters = CRFilterService.getFilters(userID);
 
-            Set<String> myInternshipIDs = new HashSet<>();
-            for (Entity i : internships) {
-                if (i.getArrayValueByIndex(9).equals(userID)) {
-                    myInternshipIDs.add(i.getArrayValueByIndex(0));
+            Map<String, InternshipEntity> myFilteredInternships = new HashMap<>();
+            for (Entity entity : internships) {
+                InternshipEntity internship = (InternshipEntity) entity;
+                if (userID.equals(internship.get(InternshipEntity.InternshipField.CRInCharge))
+                        && CRFilterService.matchesInternship(internship, filters)) {
+                    myFilteredInternships.put(internship.get(InternshipEntity.InternshipField.InternshipID), internship);
                 }
             }
 
-            List<Entity> myApps = new ArrayList<>();
-            for (Entity a : apps) {
-                if (myInternshipIDs.contains(a.getArrayValueByIndex(2))) {
-                    myApps.add(a);
+            List<ApplicationEntity> myApps = new ArrayList<>();
+            for (Entity entity : apps) {
+                ApplicationEntity application = (ApplicationEntity) entity;
+                if (myFilteredInternships.containsKey(application.get(ApplicationEntity.ApplicationField.InternshipID))) {
+                    myApps.add(application);
                 }
             }
+
+            System.out.println("Active filters: " + filters.summary());
 
             if (myApps.isEmpty()) {
-                System.out.println("No applications for your internships.");
+                if (filters.hasActiveFilters()) {
+                    System.out.println("No applications match the current filters.");
+                } else {
+                    System.out.println("No applications for your internships.");
+                }
             } else {
                 display.print_list(myApps);
             }
@@ -56,7 +66,7 @@ class ViewApplicationsDisplay extends Display {
         super(owner);
     }
 
-    public void print_list(List<Entity> apps) {
+    public void print_list(List<? extends Entity> apps) {
         System.out.println("=== Internship Applications ===");
         for (Entity e : apps) {
             System.out.println(e.toString());

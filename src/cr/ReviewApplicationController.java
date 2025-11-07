@@ -20,39 +20,60 @@ public class ReviewApplicationController extends CRController {
     @Override
     public void initialize() {
         List<Entity> applications = DatabaseManager.getDatabase(APPLICATION_FILE, new ArrayList<>(), "Application");
+        List<Entity> internships = DatabaseManager.getDatabase(INTERNSHIP_FILE, new ArrayList<>(), "Internship");
+        CRFilterService.CRFilters filters = CRFilterService.getFilters(userID);
 
-        if (applications.isEmpty()) {
-            System.out.println("No applications to review.");
+        Map<String, InternshipEntity> myFilteredInternships = new HashMap<>();
+        for (Entity entity : internships) {
+            InternshipEntity internship = (InternshipEntity) entity;
+            if (userID.equals(internship.get(InternshipEntity.InternshipField.CRInCharge))
+                    && CRFilterService.matchesInternship(internship, filters)) {
+                myFilteredInternships.put(internship.get(InternshipEntity.InternshipField.InternshipID), internship);
+            }
+        }
+
+        Map<String, ApplicationEntity> reviewableApplications = new LinkedHashMap<>();
+        for (Entity entity : applications) {
+            ApplicationEntity application = (ApplicationEntity) entity;
+            if (myFilteredInternships.containsKey(application.get(ApplicationEntity.ApplicationField.InternshipID))) {
+                reviewableApplications.put(application.get(ApplicationEntity.ApplicationField.ApplicationID), application);
+            }
+        }
+
+        System.out.println("Active filters: " + filters.summary());
+
+        if (reviewableApplications.isEmpty()) {
+            if (filters.hasActiveFilters()) {
+                System.out.println("No applications match the current filters.");
+            } else {
+                System.out.println("No applications to review.");
+            }
             router.pop();
             return;
         }
 
         display.print_menu();
-        display.print_list(applications);
+        display.print_list(new ArrayList<>(reviewableApplications.values()));
 
         String applicationId = display.get_user_input().trim();
-        Entity application = DatabaseManager.getEntryById(APPLICATION_FILE, applicationId, "Application");
-        Entity internshipToCheck  = DatabaseManager.getEntryById(INTERNSHIP_FILE, application.getArrayValueByIndex(2), "Internship");
-        if (application == null || !internshipToCheck.getArrayValueByIndex(9).equals(userID)) {
+        ApplicationEntity application = reviewableApplications.get(applicationId);
+        if (application == null) {
             System.out.println("Invalid Application ID. Returning to previous menu.");
             router.pop();
             return;
         }
 
         display.print_entry(application);
-        String choice = display.get_user_input().trim().toUpperCase();
+        String choice = display.get_user_input().trim().toUpperCase(Locale.ENGLISH);
 
         try {
-            if (choice.equals("A")) {
+            if ("A".equals(choice)) {
                 ApplicationHandler.approveApplication(applicationId);
-
-            }
-            else if (choice.equals("R")) {
-                application.setArrayValueByIndex(3, "Rejected");
+            } else if ("R".equals(choice)) {
+                application.set(ApplicationEntity.ApplicationField.Status, "Rejected");
                 DatabaseManager.updateEntry(APPLICATION_FILE, applicationId, application, "Application");
                 System.out.println("Application rejected successfully.");
-            }
-            else {
+            } else {
                 System.out.println("Invalid choice. Returning...");
             }
         } catch (Exception e) {
@@ -78,7 +99,7 @@ class ReviewApplicationDisplay extends Display {
         System.out.print("Approve (A) / Reject (R): ");
     }
 
-    public void print_list(List<Entity> list) {
+    public void print_list(List<? extends Entity> list) {
         for (Entity e : list) {
             System.out.println(e.toString());
         }

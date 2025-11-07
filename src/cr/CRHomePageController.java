@@ -2,7 +2,6 @@ package cr;
 
 import common.*;
 import exceptions.*;
-import ims.*;
 import java.util.Scanner;
 
 public class CRHomePageController extends CRController {
@@ -24,6 +23,7 @@ public class CRHomePageController extends CRController {
 
     private void handleMenu() {
         while (true) {
+            printActiveFiltersHeader();
             crDisplay.print_menu();
             String choice = crDisplay.get_user_input();
             try {
@@ -44,9 +44,16 @@ public class CRHomePageController extends CRController {
                         new ReviewApplicationController(router, scanner, userID);
                         break;
                     case "6":
-                        new PasswordChanger(router, scanner, userID); // run change password
+                        new FilterInternshipsController(router, scanner, userID);
                         break;
                     case "7":
+                        CRFilterService.clearFilters(userID);
+                        System.out.println("Internship filters cleared.");
+                        break;
+                    case "8":
+                        new PasswordChanger(router, scanner, userID); // run change password
+                        break;
+                    case "9":
                         System.out.println("Logging out...");
                         router.pop();
                         return;
@@ -57,6 +64,10 @@ public class CRHomePageController extends CRController {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    private void printActiveFiltersHeader() {
+        System.out.println("Active filters: " + CRFilterService.summarize(userID));
     }
 
     // Private inner display class for CR home page
@@ -74,8 +85,10 @@ public class CRHomePageController extends CRController {
             System.out.println("3. Toggle internship visibility");
             System.out.println("4. View applications for my internships");
             System.out.println("5. Review internship application");
-            System.out.println("6. Change password");
-            System.out.println("7. Logout");
+            System.out.println("6. Update internship filters");
+            System.out.println("7. Clear internship filters");
+            System.out.println("8. Change password");
+            System.out.println("9. Logout");
             System.out.print("Select an option: ");
         }
     }
