@@ -1,15 +1,15 @@
 package common;
 
+import exceptions.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.Scanner;
-import exceptions.*;
 
 public abstract class StaffController extends UserController {
 
     protected String staffID;
     protected String name;
-    protected String role;
+    protected String staffRole;
     protected String department;
     protected String email;
 
@@ -18,7 +18,7 @@ public abstract class StaffController extends UserController {
         super(router,scanner,staffID);
         this.staffID = staffID;
 
-        File file = new File("resources/staff.csv");
+    File file = new File(PathResolver.resource("staff.csv"));
         boolean found = false;
 
         if (!file.exists()) {
@@ -35,7 +35,7 @@ public abstract class StaffController extends UserController {
 
                 if (parts[0].equals(staffID)) {
                     this.name = parts[1].trim();
-                    this.role = parts[2].trim();
+                    this.staffRole = parts[2].trim();
                     this.department = parts[3].trim();
                     this.email = parts[4].trim();
                     found = true;
@@ -57,7 +57,7 @@ public abstract class StaffController extends UserController {
 
     // Optional: helper method to display staff info
     public void printStaffInfo() {
-        System.out.printf("ID: %s\nName: %s\nRole: %s\nDepartment: %s\nEmail: %s\n",
-                staffID, name, role, department, email);
+    System.out.printf("ID: %s\nName: %s\nRole: %s\nDepartment: %s\nEmail: %s\n",
+        staffID, name, staffRole, department, email);
     }
 }

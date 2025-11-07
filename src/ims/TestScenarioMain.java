@@ -10,7 +10,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.Scanner;
 
 /**
@@ -103,7 +102,7 @@ public final class TestScenarioMain {
 
         try {
             Authentication authentication = new Authentication(router, scanner);
-            Objects.requireNonNull(authentication);
+            authentication.start();
         } catch (RuntimeException ex) {
             System.err.println("Scenario terminated with exception: " + ex.getMessage());
             ex.printStackTrace(System.err);

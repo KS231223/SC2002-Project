@@ -1,9 +1,6 @@
 package ims;
 
-import cr.*;
-import staff.*;
-import student.*;
-import common.*;
+import common.Router;
 import java.util.Scanner;
 
 public class Main {
@@ -11,7 +8,8 @@ public class Main {
         System.out.println("Starting Internship Placement Management System...\n");
         Router router = new Router();
         Scanner scanner = new Scanner(System.in);
-        Authentication authentication = new Authentication(router,scanner);
+        Authentication authentication = new Authentication(router, scanner);
+        authentication.start();
 
     }
 }

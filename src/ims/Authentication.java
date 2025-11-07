@@ -1,22 +1,25 @@
 package ims;
-import common.*;
-import cr.*;
-import staff.*;
-import student.*;
-import exceptions.*;
+
+import common.Controller;
+import common.Display;
+import common.Router;
 import java.util.Scanner;
 
 public class Authentication extends Controller {
 
-   private AuthenticationDisplay authenticationDisplay;
+   private final AuthenticationDisplay authenticationDisplay;
 
     public Authentication(Router router, Scanner scanner) {
 
         super(router,scanner);
         this.authenticationDisplay = new AuthenticationDisplay(this);
+    }
+
+    public void start() {
         router.push(this);
     }
 
+    @Override
     public void initialize() {
         boolean validChoice = false;
 
@@ -42,27 +45,29 @@ public class Authentication extends Controller {
      * Routes user to the chosen controller.
      * Returns true if a valid option was selected, false otherwise.
      */
+    @SuppressWarnings("ResultOfObjectAllocationIgnored")
     private boolean route_to(String chosen_route) {
-        switch (chosen_route.trim()) {
-            case "1": // Login
+        return switch (chosen_route.trim()) {
+            case "1" -> {
                 System.out.println("\nRouting to Login...\n");
-                new LoginController(router, scanner);
-                return true;
-
-            case "2": // Registration
+                new LoginController(router, scanner).start();
+                yield true;
+            }
+            case "2" -> {
                 System.out.println("\nRouting to Register as Company Representative...\n");
                 new RegistrationController(router, scanner);
-                return true;
-
-            case "3": // Exit
+                yield true;
+            }
+            case "3" -> {
                 System.out.println("Exiting system...");
                 router.pop();
-                return true;
-
-            default: // Invalid option
+                yield true;
+            }
+            default -> {
                 System.out.println("Invalid choice, please try again.\n");
-                return false;
-        }
+                yield false;
+            }
+        };
     }
 }
 
@@ -73,7 +78,7 @@ class AuthenticationDisplay extends Display {
         super(owner); // call abstract class constructor
     }
 
-
+    @Override
     public void print_menu() {
         System.out.println("=== Internship Placement Management System ===");
         System.out.println("1. Login");

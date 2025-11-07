@@ -9,17 +9,21 @@ import staff.*;
 import student.*;
 
 public class LoginController extends Controller {
-    private Display loginDisplay;
+    private final Display loginDisplay;
     private static final String USER_DB_PATH =
         PathResolver.resource("users.csv");
 
     public LoginController(Router router, Scanner scanner) {
         super(router, scanner);
         this.loginDisplay = new LoginDisplay(this);
+    }
+
+    public void start() {
         router.push(this);
     }
 
     @Override
+    @SuppressWarnings("ResultOfObjectAllocationIgnored")
     public void initialize() {
         try {
             loginDisplay.print_menu();
@@ -36,9 +40,11 @@ public class LoginController extends Controller {
 
                 try {
                     switch (role) {
-                        case "staff" -> new StaffHomePageController(router, scanner, username);
-                        case "student" -> new StudentHomePageController(router, scanner, username);
-                        case "cr" -> new CRHomePageController(router, scanner, username);
+                        case "staff" -> {
+                            new StaffHomePageController(router, scanner, username).open();
+                        }
+                        case "student" -> Objects.requireNonNull(new StudentHomePageController(router, scanner, username));
+                        case "cr" -> Objects.requireNonNull(new CRHomePageController(router, scanner, username));
                         default -> System.err.println("Unknown role: " + role);
                     }
                 } catch (InvalidStaffIDException | InvalidStudentIDException | InvalidCompanyRepIDException e) {
