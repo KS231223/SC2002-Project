@@ -158,7 +158,7 @@ public final class StaffReviewFilters {
         if (!normalizedWhole.isEmpty() && filter.contains(normalizedWhole)) {
             return true;
         }
-        String[] tokens = source.split("[;,|/\\]+");
+        String[] tokens = source.split("[;,|/\\\\]+");
         for (String token : tokens) {
             String normalized = normalize(token);
             if (!normalized.isEmpty() && filter.contains(normalized)) {
