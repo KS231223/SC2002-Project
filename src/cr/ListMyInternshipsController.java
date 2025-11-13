@@ -25,8 +25,10 @@ public class ListMyInternshipsController extends CRController {
 
             for (Entity entity : allInternships) {
                 InternshipEntity internship = (InternshipEntity) entity;
-                if (userID.equals(internship.get(InternshipEntity.InternshipField.CRInCharge))
-                        && CRFilterService.matchesInternship(internship, filters)) {
+                if (!CRFilterService.belongsToCompany(internship, companyName)) {
+                    continue;
+                }
+                if (CRFilterService.matchesInternship(internship, filters)) {
                     filteredInternships.add(internship);
                 }
             }

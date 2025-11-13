@@ -26,8 +26,10 @@ public class ReviewApplicationController extends CRController {
         Map<String, InternshipEntity> myFilteredInternships = new HashMap<>();
         for (Entity entity : internships) {
             InternshipEntity internship = (InternshipEntity) entity;
-            if (userID.equals(internship.get(InternshipEntity.InternshipField.CRInCharge))
-                    && CRFilterService.matchesInternship(internship, filters)) {
+            if (!CRFilterService.belongsToCompany(internship, companyName)) {
+                continue;
+            }
+            if (CRFilterService.matchesInternship(internship, filters)) {
                 myFilteredInternships.put(internship.get(InternshipEntity.InternshipField.InternshipID), internship);
             }
         }
@@ -67,14 +69,14 @@ public class ReviewApplicationController extends CRController {
         String choice = display.get_user_input().trim().toUpperCase(Locale.ENGLISH);
 
         try {
-            if ("A".equals(choice)) {
-                ApplicationHandler.approveApplication(applicationId);
-            } else if ("R".equals(choice)) {
-                application.set(ApplicationEntity.ApplicationField.Status, "Rejected");
-                DatabaseManager.updateEntry(APPLICATION_FILE, applicationId, application, "Application");
-                System.out.println("Application rejected successfully.");
-            } else {
-                System.out.println("Invalid choice. Returning...");
+            switch (choice) {
+                case "A" -> ApplicationHandler.approveApplication(applicationId);
+                case "R" -> {
+                    application.set(ApplicationEntity.ApplicationField.Status, "Rejected");
+                    DatabaseManager.updateEntry(APPLICATION_FILE, applicationId, application, "Application");
+                    System.out.println("Application rejected successfully.");
+                }
+                default -> System.out.println("Invalid choice. Returning...");
             }
         } catch (Exception e) {
             System.err.println("Error while reviewing application: " + e.getMessage());

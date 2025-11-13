@@ -28,8 +28,10 @@ public class ViewApplicationsController extends CRController {
             Map<String, InternshipEntity> myFilteredInternships = new HashMap<>();
             for (Entity entity : internships) {
                 InternshipEntity internship = (InternshipEntity) entity;
-                if (userID.equals(internship.get(InternshipEntity.InternshipField.CRInCharge))
-                        && CRFilterService.matchesInternship(internship, filters)) {
+                if (!CRFilterService.belongsToCompany(internship, companyName)) {
+                    continue;
+                }
+                if (CRFilterService.matchesInternship(internship, filters)) {
                     myFilteredInternships.put(internship.get(InternshipEntity.InternshipField.InternshipID), internship);
                 }
             }

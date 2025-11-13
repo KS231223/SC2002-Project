@@ -8,20 +8,35 @@ import java.util.*;
 import staff.*;
 import student.*;
 
+/**
+ * Coordinates credential collection and routes users to the appropriate home page based on their role.
+ */
 public class LoginController extends Controller {
     private final Display loginDisplay;
     private static final String USER_DB_PATH =
         PathResolver.resource("users.csv");
 
+    /**
+     * Creates a login controller bound to the shared router and input stream.
+     *
+     * @param router  navigation stack shared across controllers
+     * @param scanner scanner used to capture user credentials
+     */
     public LoginController(Router router, Scanner scanner) {
         super(router, scanner);
         this.loginDisplay = new LoginDisplay(this);
     }
 
+    /**
+     * Pushes this controller onto the router to begin the login workflow.
+     */
     public void start() {
         router.push(this);
     }
 
+    /**
+     * Handles the interactive login flow and routes the authenticated user to their landing page.
+     */
     @Override
     @SuppressWarnings("ResultOfObjectAllocationIgnored")
     public void initialize() {
@@ -61,7 +76,11 @@ public class LoginController extends Controller {
     }
 
     /**
-     * Get corresponding role for a username/password combo using DatabaseManager
+     * Retrieves the role associated with the supplied credentials by querying the user database.
+     *
+     * @param username login identifier entered by the user
+     * @param password password entered by the user
+     * @return matching role string or {@code "None"} when the credentials are invalid
      */
     private String get_corresponding_role(String username, String password) {
         File file = new File(USER_DB_PATH);
@@ -89,21 +108,38 @@ public class LoginController extends Controller {
         return "None";
     }
 
+    /**
+     * Returns control to the authentication menu.
+     */
     private void destroy() {
         System.out.println("\nReturning to main menu...\n");
     }
 }
 
+/**
+ * Console helper responsible for rendering login prompts and collecting credentials.
+ */
 class LoginDisplay extends Display {
+    /**
+     * Creates the display helper tied to the owning login controller.
+     *
+     * @param owner controller that uses this display
+     */
     public LoginDisplay(Controller owner) {
         super(owner);
     }
 
+    /** Prints the login menu header. */
     @Override
     public void print_menu() {
         System.out.println("=== Login ===");
     }
 
+    /**
+     * Collects a username and password pair from the console input.
+     *
+     * @return two-element array containing username and password
+     */
     public String[] get_credentials() {
         System.out.print("Username: ");
         String username = get_user_input();

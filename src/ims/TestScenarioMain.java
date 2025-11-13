@@ -34,8 +34,14 @@ public final class TestScenarioMain {
     private static final Path STUDENTS_FILE = Paths.get("resources", "student.csv");
     private static final Path APPLICATIONS_FILE = Paths.get("resources", "internship_applications.csv");
 
+    /** Lightweight value object describing a named scenario and its scripted steps. */
     private record Scenario(String name, String[] steps) {}
 
+    /**
+     * Entry point that resolves the requested scenario, seeds baseline data, and replays the flow.
+     *
+     * @param args optional scenario key (defaults to the full student flow)
+     */
     public static void main(String[] args) {
         Scenario scenario = resolveScenario(args);
         System.out.println("\n>>> Selected scenario: " + scenario.name());
@@ -43,6 +49,12 @@ public final class TestScenarioMain {
         runScenario(scenario);
     }
 
+    /**
+     * Maps command-line arguments to a known scenario configuration.
+     *
+     * @param args command-line arguments (may be {@code null})
+     * @return resolved scenario definition
+     */
     private static Scenario resolveScenario(String[] args) {
         if (args == null || args.length == 0) {
             return studentFullMenuScenario();
@@ -59,6 +71,11 @@ public final class TestScenarioMain {
         };
     }
 
+    /**
+     * Builds the full student flow scenario comprising filtering, applying, and withdrawing.
+     *
+     * @return scenario containing menu inputs and actions
+     */
     private static Scenario studentFullMenuScenario() {
         String[] steps = {
             "1", STUDENT_A, DEFAULT_PASSWORD,
@@ -82,6 +99,11 @@ public final class TestScenarioMain {
         return new Scenario("Student A covers main menu", steps);
     }
 
+    /**
+     * Builds the focused scenario where a student accepts an existing offer.
+     *
+     * @return scenario tailored to the accept-offer flow
+     */
     private static Scenario studentAcceptScenario() {
         String[] steps = {
             "1", STUDENT_B, DEFAULT_PASSWORD,
@@ -92,6 +114,11 @@ public final class TestScenarioMain {
         return new Scenario("Student B accepts an offer", steps);
     }
 
+    /**
+     * Executes the selected scenario by streaming scripted input through the CLI.
+     *
+     * @param scenario scenario descriptor containing metadata and steps
+     */
     @SuppressWarnings("ResultOfObjectAllocationIgnored")
     private static void runScenario(Scenario scenario) {
         System.out.println("Running scenario: " + scenario.name());
@@ -111,6 +138,9 @@ public final class TestScenarioMain {
         }
     }
 
+    /**
+     * Ensures user, student, and application records are aligned with scenario expectations.
+     */
     private static void baselineData() {
         ensureUserPassword(STUDENT_A, DEFAULT_PASSWORD);
         ensureUserPassword(STUDENT_B, DEFAULT_PASSWORD);
@@ -119,6 +149,12 @@ public final class TestScenarioMain {
         ensureApplicationStatus(APPLICATION_APPROVED_ID, "Approved");
     }
 
+    /**
+     * Updates the users CSV so that the desired password is set for the specified user.
+     *
+     * @param userId          unique user identifier
+     * @param desiredPassword password to enforce prior to running the scenario
+     */
     private static void ensureUserPassword(String userId, String desiredPassword) {
         try {
             var lines = Files.readAllLines(USERS_FILE);
@@ -143,6 +179,12 @@ public final class TestScenarioMain {
         }
     }
 
+    /**
+     * Resets the accepted internship field for the supplied student to ensure a clean slate.
+     *
+     * @param studentId     student identifier
+     * @param acceptedValue value to apply to the accepted internship column
+     */
     private static void ensureStudentAcceptedValue(String studentId, String acceptedValue) {
         try {
             var lines = Files.readAllLines(STUDENTS_FILE);
@@ -168,6 +210,12 @@ public final class TestScenarioMain {
         }
     }
 
+    /**
+     * Guarantees that the application with the provided identifier has the desired status.
+     *
+     * @param applicationId application identifier to update
+     * @param status        target status value
+     */
     private static void ensureApplicationStatus(String applicationId, String status) {
         try {
             var lines = Files.readAllLines(APPLICATIONS_FILE);

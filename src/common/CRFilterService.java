@@ -107,11 +107,18 @@ public final class CRFilterService {
             return false;
         }
 
-        if (filters.hasMajor() && !equalsIgnoreCase(internship.get(InternshipEntity.InternshipField.PreferredMajor), filters.major())) {
+        if (filters.hasMajor() && !matchesMajor(internship.get(InternshipEntity.InternshipField.PreferredMajor), filters.major())) {
             return false;
         }
 
         return true;
+    }
+
+    public static boolean belongsToCompany(InternshipEntity internship, String companyName) {
+        if (internship == null || companyName == null) {
+            return false;
+        }
+        return equalsIgnoreCase(internship.get(InternshipEntity.InternshipField.CompanyName), companyName);
     }
 
     public static String summarize(String crId) {
@@ -163,6 +170,30 @@ public final class CRFilterService {
             return false;
         }
         return left.trim().equalsIgnoreCase(right.trim());
+    }
+
+    private static boolean matchesMajor(String source, String filter) {
+        if (source == null || filter == null) {
+            return false;
+        }
+        String normalizedFilter = filter.trim().toUpperCase(Locale.ENGLISH);
+        if (normalizedFilter.isEmpty()) {
+            return false;
+        }
+
+        String normalizedSource = source.trim().toUpperCase(Locale.ENGLISH);
+        if (normalizedSource.equals(normalizedFilter)) {
+            return true;
+        }
+
+        String[] tokens = normalizedSource.split("[;,|/]+");
+        for (String token : tokens) {
+            String trimmed = token.trim();
+            if (!trimmed.isEmpty() && trimmed.equals(normalizedFilter)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static String cleaned(String input) {

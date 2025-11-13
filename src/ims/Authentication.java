@@ -5,16 +5,29 @@ import common.Display;
 import common.Router;
 import java.util.Scanner;
 
+/**
+ * Handles the top-level authentication choices for the CLI, allowing users to
+ * log in, register as a company representative, or exit the system.
+ */
 public class Authentication extends Controller {
 
    private final AuthenticationDisplay authenticationDisplay;
 
+    /**
+     * Creates the authentication controller and binds it to the shared router and scanner.
+     *
+     * @param router  navigation stack used across the CLI
+     * @param scanner shared input source for user prompts
+     */
     public Authentication(Router router, Scanner scanner) {
 
         super(router,scanner);
         this.authenticationDisplay = new AuthenticationDisplay(this);
     }
 
+    /**
+     * Starts the authentication flow by pushing this controller onto the router stack.
+     */
     public void start() {
         router.push(this);
     }
@@ -42,8 +55,10 @@ public class Authentication extends Controller {
     }
 
     /**
-     * Routes user to the chosen controller.
-     * Returns true if a valid option was selected, false otherwise.
+     * Routes the user to the controller that corresponds to the provided menu option.
+     *
+     * @param chosen_route raw menu option selected by the user
+     * @return {@code true} when the option is recognised and handled, otherwise {@code false}
      */
     @SuppressWarnings("ResultOfObjectAllocationIgnored")
     private boolean route_to(String chosen_route) {
@@ -74,10 +89,16 @@ public class Authentication extends Controller {
 
 class AuthenticationDisplay extends Display {
 
+    /**
+     * Creates a display helper that renders the authentication menu.
+     *
+     * @param owner controller coordinating this display
+     */
     public AuthenticationDisplay(Controller owner) {
         super(owner); // call abstract class constructor
     }
 
+    /** Prints the authentication menu options. */
     @Override
     public void print_menu() {
         System.out.println("=== Internship Placement Management System ===");

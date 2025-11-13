@@ -101,7 +101,7 @@ public final class StaffReviewFilters {
             return false;
         }
         boolean statusOk = statuses.isEmpty() || statuses.contains(normalize(entity.get(InternshipEntity.InternshipField.Status)));
-        boolean majorOk = majors.isEmpty() || majors.contains(normalize(entity.get(InternshipEntity.InternshipField.PreferredMajor)));
+    boolean majorOk = majors.isEmpty() || containsAnyToken(entity.get(InternshipEntity.InternshipField.PreferredMajor), majors);
         boolean levelOk = levels.isEmpty() || levels.contains(normalize(entity.get(InternshipEntity.InternshipField.Level)));
         boolean companyOk = companies.isEmpty() || companies.contains(normalize(entity.get(InternshipEntity.InternshipField.CompanyName)));
         boolean openDateOk = dateMatches(entity.get(InternshipEntity.InternshipField.OpenDate), openDateRange);
@@ -123,7 +123,7 @@ public final class StaffReviewFilters {
             return false;
         }
         if (internship != null) {
-            if (!majors.isEmpty() && !majors.contains(normalize(internship.get(InternshipEntity.InternshipField.PreferredMajor)))) {
+            if (!majors.isEmpty() && !containsAnyToken(internship.get(InternshipEntity.InternshipField.PreferredMajor), majors)) {
                 return false;
             }
             if (!levels.isEmpty() && !levels.contains(normalize(internship.get(InternshipEntity.InternshipField.Level)))) {
@@ -154,9 +154,14 @@ public final class StaffReviewFilters {
         if (source == null) {
             return false;
         }
-        String[] tokens = source.split("[;,|/\\s]+");
+        String normalizedWhole = normalize(source);
+        if (!normalizedWhole.isEmpty() && filter.contains(normalizedWhole)) {
+            return true;
+        }
+        String[] tokens = source.split("[;,|/\\]+");
         for (String token : tokens) {
-            if (filter.contains(normalize(token))) {
+            String normalized = normalize(token);
+            if (!normalized.isEmpty() && filter.contains(normalized)) {
                 return true;
             }
         }
