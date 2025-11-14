@@ -3,56 +3,167 @@ package common;
 import java.io.*;
 import java.util.*;
 
-public class DatabaseManager {
+// Interface for entity creation (Factory pattern + OCP)
+interface EntityFactory {
+    Entity createEntity(String csvLine);
+    boolean canHandle(String entityType);
+}
 
-    public static List<Entity> getDatabase(String filePath, List<Entity> outList, String entityType) {
-        outList.clear();
+// Concrete factory implementations
+class StudentEntityFactory implements EntityFactory {
+    public Entity createEntity(String csvLine) {
+        return new StudentEntity(csvLine);
+    }
+    public boolean canHandle(String entityType) {
+        return "Student".equals(entityType);
+    }
+}
+
+class StaffEntityFactory implements EntityFactory {
+    public Entity createEntity(String csvLine) {
+        return new StaffEntity(csvLine);
+    }
+    public boolean canHandle(String entityType) {
+        return "Staff".equals(entityType);
+    }
+}
+
+class CREntityFactory implements EntityFactory {
+    public Entity createEntity(String csvLine) {
+        return new CREntity(csvLine);
+    }
+    public boolean canHandle(String entityType) {
+        return "CR".equals(entityType);
+    }
+}
+
+class InternshipEntityFactory implements EntityFactory {
+    public Entity createEntity(String csvLine) {
+        return new InternshipEntity(csvLine);
+    }
+    public boolean canHandle(String entityType) {
+        return "Internship".equals(entityType);
+    }
+}
+
+class ApplicationEntityFactory implements EntityFactory {
+    public Entity createEntity(String csvLine) {
+        return new ApplicationEntity(csvLine);
+    }
+    public boolean canHandle(String entityType) {
+        return "Application".equals(entityType);
+    }
+}
+
+class UserEntityFactory implements EntityFactory {
+    public Entity createEntity(String csvLine) {
+        return new UserEntity(csvLine);
+    }
+    public boolean canHandle(String entityType) {
+        return "User".equals(entityType);
+    }
+}
+
+// Registry for entity factories (OCP compliant)
+class EntityFactoryRegistry {
+    private static final List<EntityFactory> factories = new ArrayList<>();
+
+    static {
+        // Register all factories
+        factories.add(new StudentEntityFactory());
+        factories.add(new StaffEntityFactory());
+        factories.add(new CREntityFactory());
+        factories.add(new InternshipEntityFactory());
+        factories.add(new ApplicationEntityFactory());
+        factories.add(new UserEntityFactory());
+    }
+
+    public static Entity createEntity(String entityType, String csvLine) {
+        for (EntityFactory factory : factories) {
+            if (factory.canHandle(entityType)) {
+                return factory.createEntity(csvLine);
+            }
+        }
+        return null;
+    }
+
+    // Allow adding new factories at runtime (OCP)
+    public static void registerFactory(EntityFactory factory) {
+        factories.add(factory);
+    }
+}
+
+// Interface for file operations (DIP)
+interface FileOperations {
+    List<String> readLines(String filePath);
+    void writeLines(String filePath, List<String> lines, boolean append);
+}
+
+// Concrete implementation of file operations (SRP)
+class StandardFileOperations implements FileOperations {
+    public List<String> readLines(String filePath) {
+        List<String> lines = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line;
             while ((line = br.readLine()) != null) {
-                if (line.trim().isEmpty()) continue;
-                Entity e = switch (entityType) {
-                    // wow very cool!
-                    case "Student" -> new StudentEntity(line);
-                    case "Staff" -> new StaffEntity(line);
-                    case "CR" -> new CREntity(line);
-                    case "Internship" -> new InternshipEntity(line);
-                    case "Application" -> new ApplicationEntity(line);
-                    case "User" -> new UserEntity(line);
-                    default -> null;
-                };
-                if (e != null) outList.add(e);
+                if (!line.trim().isEmpty()) {
+                    lines.add(line);
+                }
             }
         } catch (IOException ex) {
             ex.printStackTrace();
         }
-        return outList;
+        return lines;
     }
 
-    // Append new entry
-    public static void appendEntry(String filePath, Entity entry) {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath, true))) {
-            bw.write(entry.toCSVFormat());
-            bw.newLine();
+    public void writeLines(String filePath, List<String> lines, boolean append) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath, append))) {
+            for (String line : lines) {
+                bw.write(line);
+                bw.newLine();
+            }
         } catch (IOException ex) {
             ex.printStackTrace();
         }
     }
+}
 
-    // Update entry by ID (first column)
-    public static void updateEntry(String filePath, String id, Entity newEntry, String entityType) {
-        List<Entity> list = getDatabase(filePath, new ArrayList<>(), entityType);
-        for (int i = 0; i < list.size(); i++) {
-            if (list.get(i).values[0].equals(id)) {
-                list.set(i, newEntry);
-                break;
+// Repository for entity operations (SRP)
+class EntityRepository {
+    private final FileOperations fileOps;
+
+    public EntityRepository(FileOperations fileOps) {
+        this.fileOps = fileOps;
+    }
+
+    public List<Entity> loadEntities(String filePath, String entityType) {
+        List<Entity> entities = new ArrayList<>();
+        List<String> lines = fileOps.readLines(filePath);
+
+        for (String line : lines) {
+            Entity entity = EntityFactoryRegistry.createEntity(entityType, line);
+            if (entity != null) {
+                entities.add(entity);
             }
         }
-        rewriteFile(filePath, list);
+        return entities;
     }
-    public static Entity getEntryById(String filePath, String id, String entityType){
-        List<Entity> list = getDatabase(filePath, new ArrayList<>(), entityType);
-        for (Entity entity : list) {
+
+    public void saveEntities(String filePath, List<Entity> entities) {
+        List<String> lines = new ArrayList<>();
+        for (Entity entity : entities) {
+            lines.add(entity.toCSVFormat());
+        }
+        fileOps.writeLines(filePath, lines, false);
+    }
+
+    public void appendEntity(String filePath, Entity entity) {
+        List<String> lines = Collections.singletonList(entity.toCSVFormat());
+        fileOps.writeLines(filePath, lines, true);
+    }
+
+    public Entity findById(List<Entity> entities, String id) {
+        for (Entity entity : entities) {
             if (entity.values[0].equals(id)) {
                 return entity;
             }
@@ -60,27 +171,57 @@ public class DatabaseManager {
         return null;
     }
 
-    // Delete entry by ID (first column)
-    public static void deleteEntry(String filePath, String id, String entityType) {
-        List<Entity> list = getDatabase(filePath, new ArrayList<>(), entityType);
+    public List<Entity> removeById(List<Entity> entities, String id) {
         List<Entity> filtered = new ArrayList<>();
-        for (Entity eToDelete : list) {
-            if (!eToDelete.values[0].equals(id)) {
-                filtered.add(eToDelete);
+        for (Entity entity : entities) {
+            if (!entity.values[0].equals(id)) {
+                filtered.add(entity);
             }
         }
-        rewriteFile(filePath, filtered);
+        return filtered;
     }
 
-    // Helper: rewrite the file with all entries
-    private static void rewriteFile(String filePath, List<Entity> list) {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath, false))) {
-            for (Entity e : list) {
-                bw.write(e.toCSVFormat());
-                bw.newLine();
+    public List<Entity> replaceById(List<Entity> entities, String id, Entity newEntity) {
+        for (int i = 0; i < entities.size(); i++) {
+            if (entities.get(i).values[0].equals(id)) {
+                entities.set(i, newEntity);
+                break;
             }
-        } catch (IOException ex) {
-            ex.printStackTrace();
         }
+        return entities;
+    }
+}
+
+// Main DatabaseManager
+public class DatabaseManager {
+    private static final EntityRepository repository =
+            new EntityRepository(new StandardFileOperations());
+
+    public static List<Entity> getDatabase(String filePath, List<Entity> outList, String entityType) {
+        outList.clear();
+        List<Entity> entities = repository.loadEntities(filePath, entityType);
+        outList.addAll(entities);
+        return outList;
+    }
+
+    public static void appendEntry(String filePath, Entity entry) {
+        repository.appendEntity(filePath, entry);
+    }
+
+    public static void updateEntry(String filePath, String id, Entity newEntry, String entityType) {
+        List<Entity> list = repository.loadEntities(filePath, entityType);
+        list = repository.replaceById(list, id, newEntry);
+        repository.saveEntities(filePath, list);
+    }
+
+    public static Entity getEntryById(String filePath, String id, String entityType) {
+        List<Entity> list = repository.loadEntities(filePath, entityType);
+        return repository.findById(list, id);
+    }
+
+    public static void deleteEntry(String filePath, String id, String entityType) {
+        List<Entity> list = repository.loadEntities(filePath, entityType);
+        list = repository.removeById(list, id);
+        repository.saveEntities(filePath, list);
     }
 }

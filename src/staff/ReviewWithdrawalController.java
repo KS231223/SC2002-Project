@@ -7,11 +7,11 @@ public class ReviewWithdrawalController extends Controller {
     private final ReviewWithdrawalDisplay display;
     private final StaffReviewFilters filters;
     private static final String PENDING_WITHDRAWAL_FILE =
-        PathResolver.resource("pending_withdrawal.csv");
+            PathResolver.resource("pending_withdrawal.csv");
     private static final String APPLICATION_FILE =
-        PathResolver.resource("internship_applications.csv");
+            PathResolver.resource("internship_applications.csv");
     private static final String INTERNSHIP_FILE =
-        PathResolver.resource("internship_opportunities.csv");
+            PathResolver.resource("internship_opportunities.csv");
 
     @SuppressWarnings("LeakingThisInConstructor")
     public ReviewWithdrawalController(Router router, Scanner scanner, String staffID, StaffReviewFilters filters) {
@@ -29,32 +29,38 @@ public class ReviewWithdrawalController extends Controller {
             router.pop();
             return;
         }
+
         Map<String, InternshipEntity> internships = loadInternships();
         StaffReviewFilters.ApplicationStats stats = loadApplicationStats();
         List<ApplicationEntity> pending = new ArrayList<>();
+
         for (Entity entity : pendingRaw) {
             if (entity instanceof ApplicationEntity application) {
                 String internshipId = application.get(ApplicationEntity.ApplicationField.InternshipID);
                 InternshipEntity internship = internships.get(internshipId);
                 long totalApps = stats.totalFor(internshipId);
                 long acceptedApps = stats.acceptedFor(internshipId);
+
                 if (filters.matchesWithdrawal(application, internship, totalApps, acceptedApps)) {
                     pending.add(application);
                 }
             }
         }
+
         if (pending.isEmpty()) {
             System.out.println("No pending withdrawals match the current filters.");
             router.pop();
             return;
         }
+
         display.print_menu();
         display.print_list(new ArrayList<>(pending));
+
         String withdrawalId = display.get_user_input().trim();
         ApplicationEntity withdrawalEntity = pending.stream()
-            .filter(app -> app.get(ApplicationEntity.ApplicationField.ApplicationID).equals(withdrawalId))
-            .findFirst()
-            .orElse(null);
+                .filter(app -> app.get(ApplicationEntity.ApplicationField.ApplicationID).equals(withdrawalId))
+                .findFirst()
+                .orElse(null);
 
         if (withdrawalEntity == null) {
             System.out.println("Invalid ID. Returning to previous menu.");
@@ -65,9 +71,14 @@ public class ReviewWithdrawalController extends Controller {
         display.print_entry(withdrawalEntity);
         String choice = display.get_user_input().trim().toUpperCase();
 
-        if (choice.equals("A")) ApplicationHandler.withdrawApplication(withdrawalId);
-        if (choice.equals("A") || choice.equals("R"))
+        // Delegate to ApplicationHandler
+        if (choice.equals("A")) {
+            ApplicationHandler.withdrawApplication(withdrawalId);
+        }
+
+        if (choice.equals("A") || choice.equals("R")) {
             DatabaseManager.deleteEntry(PENDING_WITHDRAWAL_FILE, withdrawalId, "Application");
+        }
 
         System.out.println("\nWithdrawal review complete.");
         router.pop();
@@ -88,6 +99,7 @@ public class ReviewWithdrawalController extends Controller {
         List<Entity> applications = DatabaseManager.getDatabase(APPLICATION_FILE, new ArrayList<>(), "Application");
         Map<String, Long> total = new HashMap<>();
         Map<String, Long> accepted = new HashMap<>();
+
         for (Entity entity : applications) {
             if (entity instanceof ApplicationEntity application) {
                 String internshipId = application.get(ApplicationEntity.ApplicationField.InternshipID);
@@ -97,6 +109,7 @@ public class ReviewWithdrawalController extends Controller {
                 }
             }
         }
+
         return new StaffReviewFilters.ApplicationStats(total, accepted);
     }
 }

@@ -26,9 +26,13 @@ public class ApplicationHandler {
                 case "Approved":
                     internshipToChange.setArrayValueByIndex(10,modifySlots(internshipSlots, 1));
                     DatabaseManager.updateEntry(INTERNSHIP_FILE, internshipId,internshipToChange, "Internship");
+                    internshipToChange.setArrayValueByIndex(7, "Pending");
                 default:
                     applicationToWithdraw.setArrayValueByIndex(3,"WITHDRAWN");
                     DatabaseManager.updateEntry(APPLICATION_FILE, applicationId, applicationToWithdraw, "Application");
+
+
+
             }
 
         } catch (Exception e) {
