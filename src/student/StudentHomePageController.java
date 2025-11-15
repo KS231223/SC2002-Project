@@ -22,8 +22,8 @@ public class StudentHomePageController extends StudentController {
      * @throws InvalidStudentIDException when {@code studentID} is invalid
      */
     @SuppressWarnings("LeakingThisInConstructor")
-    public StudentHomePageController(Router router, Scanner scanner, String studentID) throws InvalidStudentIDException {
-        super(router, scanner, studentID);
+    public StudentHomePageController(Router router, Scanner scanner, EntityStore entityStore, String studentID) throws InvalidStudentIDException {
+        super(router, scanner, entityStore, studentID);
         this.studentDisplay = new StudentHomeDisplay(this);
         router.replace(this); // swaps into this controller
     }
@@ -48,14 +48,14 @@ public class StudentHomePageController extends StudentController {
 
             try {
                 switch (choice) {
-                    case "1" -> new ViewInternshipController(router, scanner, studentID);
-                    case "2" -> new UpdateInternshipFiltersController(router, scanner, studentID);
+                    case "1" -> new ViewInternshipController(router, scanner, entityStore, studentID);
+                    case "2" -> new UpdateInternshipFiltersController(router, scanner, entityStore, studentID);
                     case "3" -> handleClearFilters();
-                    case "4" -> new ApplyInternshipController(router, scanner, studentID);
-                    case "5" -> new ViewApplicationsController(router, scanner, studentID);
-                    case "6" -> new WithdrawalRequestController(router, scanner, studentID);
-                    case "7" -> new AcceptOfferController(router, scanner, studentID);
-                    case "8" -> new PasswordChanger(router, scanner, userID); // run change password
+                    case "4" -> new ApplyInternshipController(router, scanner, entityStore, studentID);
+                    case "5" -> new ViewApplicationsController(router, scanner, entityStore, studentID);
+                    case "6" -> new WithdrawalRequestController(router, scanner, entityStore, studentID);
+                    case "7" -> new AcceptOfferController(router, scanner, entityStore, studentID);
+                    case "8" -> new PasswordChanger(router, scanner, entityStore, userID); // run change password
                     case "9" -> {
                         System.out.println("Logging out...");
                         router.pop();
@@ -110,7 +110,7 @@ public class StudentHomePageController extends StudentController {
      */
     private void handleClearFilters() {
         try {
-            StudentFilterService.clearFilters(studentID);
+            StudentFilterService.clearFilters(entityStore, studentID);
             System.out.println("Internship filters cleared. Listings will default to alphabetical order.");
         } catch (IllegalArgumentException ex) {
             System.out.println("Unable to clear filters: " + ex.getMessage());

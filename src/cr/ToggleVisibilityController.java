@@ -10,8 +10,8 @@ public class ToggleVisibilityController extends CRController {
         PathResolver.resource("internship_opportunities.csv");
     private ToggleVisibilityDisplay display;
 
-    public ToggleVisibilityController(Router router, Scanner scanner, String crID) throws InvalidCompanyRepIDException {
-        super(router, scanner, crID);
+    public ToggleVisibilityController(Router router, Scanner scanner, EntityStore entityStore, String crID) throws InvalidCompanyRepIDException {
+        super(router, scanner, entityStore, crID);
         this.display = new ToggleVisibilityDisplay(this);
         router.push(this);
     }
@@ -19,7 +19,7 @@ public class ToggleVisibilityController extends CRController {
     @Override
     public void initialize() {
         try {
-            List<Entity> allInternships = DatabaseManager.getDatabase(INTERNSHIP_FILE, new ArrayList<>(), "Internship");
+            List<Entity> allInternships = entityStore.loadAll(INTERNSHIP_FILE, "Internship");
             List<Entity> myInternships = new ArrayList<>();
 
             for (Entity e : allInternships) {
@@ -36,7 +36,7 @@ public class ToggleVisibilityController extends CRController {
 
             display.print_list(myInternships);
             String id = display.ask("Enter internship ID to toggle visibility: ");
-            Entity internship = DatabaseManager.getEntryById(INTERNSHIP_FILE, id, "Internship");
+            Entity internship = entityStore.findById(INTERNSHIP_FILE, id, "Internship");
 
             if (internship == null) {
                 System.out.println("Invalid ID. Returning...");
@@ -46,7 +46,7 @@ public class ToggleVisibilityController extends CRController {
 
             String current = internship.getArrayValueByIndex(11);
             internship.setArrayValueByIndex(11, current.equals("Visible") ? "Hidden" : "Visible");
-            DatabaseManager.updateEntry(INTERNSHIP_FILE, id, internship, "Internship");
+            entityStore.update(INTERNSHIP_FILE, id, internship, "Internship");
             System.out.println("Visibility toggled successfully!");
 
         } catch (Exception e) {

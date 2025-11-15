@@ -1,5 +1,7 @@
 package ims;
 
+import common.DatabaseManager;
+import common.EntityStore;
 import common.Router;
 import common.StudentEntity;
 import java.io.ByteArrayInputStream;
@@ -126,9 +128,10 @@ public final class TestScenarioMain {
         ByteArrayInputStream input = new ByteArrayInputStream(joinedScript.getBytes(StandardCharsets.UTF_8));
         Scanner scanner = new Scanner(input);
         Router router = new Router();
+        EntityStore entityStore = new DatabaseManager();
 
         try {
-            Authentication authentication = new Authentication(router, scanner);
+            Authentication authentication = new Authentication(router, scanner, entityStore);
             authentication.start();
         } catch (RuntimeException ex) {
             System.err.println("Scenario terminated with exception: " + ex.getMessage());

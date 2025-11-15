@@ -2,6 +2,7 @@ package ims;
 
 import common.Controller;
 import common.Display;
+import common.EntityStore;
 import common.Router;
 import java.util.Scanner;
 
@@ -11,7 +12,7 @@ import java.util.Scanner;
  */
 public class Authentication extends Controller {
 
-   private final AuthenticationDisplay authenticationDisplay;
+    private final AuthenticationDisplay authenticationDisplay;
 
     /**
      * Creates the authentication controller and binds it to the shared router and scanner.
@@ -19,9 +20,9 @@ public class Authentication extends Controller {
      * @param router  navigation stack used across the CLI
      * @param scanner shared input source for user prompts
      */
-    public Authentication(Router router, Scanner scanner) {
+    public Authentication(Router router, Scanner scanner, EntityStore entityStore) {
 
-        super(router,scanner);
+        super(router, scanner, entityStore);
         this.authenticationDisplay = new AuthenticationDisplay(this);
     }
 
@@ -65,12 +66,12 @@ public class Authentication extends Controller {
         return switch (chosen_route.trim()) {
             case "1" -> {
                 System.out.println("\nRouting to Login...\n");
-                new LoginController(router, scanner).start();
+                new LoginController(router, scanner, entityStore).start();
                 yield true;
             }
             case "2" -> {
                 System.out.println("\nRouting to Register as Company Representative...\n");
-                new RegistrationController(router, scanner);
+                new RegistrationController(router, scanner, entityStore);
                 yield true;
             }
             case "3" -> {

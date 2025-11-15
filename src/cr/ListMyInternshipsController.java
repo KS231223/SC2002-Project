@@ -10,8 +10,8 @@ public class ListMyInternshipsController extends CRController {
         PathResolver.resource("internship_opportunities.csv");
     private ListMyInternshipsDisplay display;
 
-    public ListMyInternshipsController(Router router, Scanner scanner, String crID) throws InvalidCompanyRepIDException {
-        super(router, scanner, crID);
+    public ListMyInternshipsController(Router router, Scanner scanner, EntityStore entityStore, String crID) throws InvalidCompanyRepIDException {
+        super(router, scanner, entityStore, crID);
         this.display = new ListMyInternshipsDisplay(this);
         router.push(this);
     }
@@ -19,7 +19,7 @@ public class ListMyInternshipsController extends CRController {
     @Override
     public void initialize() {
         try {
-            List<Entity> allInternships = DatabaseManager.getDatabase(INTERNSHIP_FILE, new ArrayList<>(), "Internship");
+            List<Entity> allInternships = entityStore.loadAll(INTERNSHIP_FILE, "Internship");
             CRFilterService.CRFilters filters = CRFilterService.getFilters(userID);
             List<InternshipEntity> filteredInternships = new ArrayList<>();
 

@@ -24,8 +24,8 @@ public class WithdrawalRequestController extends StudentController {
      * @throws InvalidStudentIDException when {@code studentID} cannot be resolved
      */
     @SuppressWarnings("LeakingThisInConstructor")
-    public WithdrawalRequestController(Router router, Scanner scanner, String studentID) throws InvalidStudentIDException {
-        super(router, scanner, studentID);
+    public WithdrawalRequestController(Router router, Scanner scanner, EntityStore entityStore, String studentID) throws InvalidStudentIDException {
+        super(router, scanner, entityStore, studentID);
         this.display = new WithdrawalDisplay(this);
         router.push(this);
     }
@@ -36,7 +36,7 @@ public class WithdrawalRequestController extends StudentController {
      */
     @Override
     public void initialize() {
-        List<Entity> applications = DatabaseManager.getDatabase(APPLICATION_FILE, new ArrayList<>(), "Application");
+        List<Entity> applications = entityStore.loadAll(APPLICATION_FILE, "Application");
         List<Entity> myApps = new ArrayList<>();
 
         for (Entity e : applications) {
@@ -65,14 +65,14 @@ public class WithdrawalRequestController extends StudentController {
             return;
         }
 
-        Entity app = DatabaseManager.getEntryById(APPLICATION_FILE, trimmedId, "Application");
+        Entity app = entityStore.findById(APPLICATION_FILE, trimmedId, "Application");
         if (app == null || !app.getArrayValueByIndex(1).equals(userID)) {
             System.out.println("Invalid application ID.");
             router.pop();
             return;
         }
 
-        DatabaseManager.appendEntry(WITHDRAWAL_FILE, app);
+        entityStore.append(WITHDRAWAL_FILE, app);
         System.out.println("Application withdrawal submitted.");
         router.pop();
     }

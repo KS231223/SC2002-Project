@@ -8,6 +8,11 @@ public class ApplicationHandler {
     private static final String APPLICATION_FILE = PathResolver.resource("internship_applications.csv");
     private static final String INTERNSHIP_FILE = PathResolver.resource("internship_opportunities.csv");
     private static final String STUDENT_FILE = PathResolver.resource("student.csv");
+    private final EntityStore entityStore;
+
+    public ApplicationHandler(EntityStore entityStore) {
+        this.entityStore = entityStore;
+    }
     /*Internship => String id, String title, String description, String level,
                             String preferredMajor, String openDate, String closeDate,
                             String status, String companyName, String crInCharge,
@@ -20,11 +25,11 @@ public class ApplicationHandler {
      *
      * @param applicationId identifier of the application to withdraw
      */
-    public static void withdrawApplication(String applicationId){
+    public void withdrawApplication(String applicationId){
         try {
-            Entity applicationToWithdraw = DatabaseManager.getEntryById(APPLICATION_FILE, applicationId, "Application");
+            Entity applicationToWithdraw = entityStore.findById(APPLICATION_FILE, applicationId, "Application");
             String internshipId = applicationToWithdraw.getArrayValueByIndex(2);
-            Entity internshipToChange = DatabaseManager.getEntryById(INTERNSHIP_FILE, internshipId, "Internship");
+            Entity internshipToChange = entityStore.findById(INTERNSHIP_FILE, internshipId, "Internship");
             String internshipSlots = internshipToChange.getArrayValueByIndex(10);
 
             String applicationStatus = applicationToWithdraw.getArrayValueByIndex(3);
@@ -32,11 +37,11 @@ public class ApplicationHandler {
                 case "Accepted":
                 case "Approved":
                     internshipToChange.setArrayValueByIndex(10,modifySlots(internshipSlots, 1));
-                    DatabaseManager.updateEntry(INTERNSHIP_FILE, internshipId,internshipToChange, "Internship");
+                    entityStore.update(INTERNSHIP_FILE, internshipId, internshipToChange, "Internship");
                     internshipToChange.setArrayValueByIndex(7, "Pending");
                 default:
                     applicationToWithdraw.setArrayValueByIndex(3,"WITHDRAWN");
-                    DatabaseManager.updateEntry(APPLICATION_FILE, applicationId, applicationToWithdraw, "Application");
+                    entityStore.update(APPLICATION_FILE, applicationId, applicationToWithdraw, "Application");
 
 
 
@@ -52,12 +57,12 @@ public class ApplicationHandler {
      *
      * @param applicationId identifier of the application to approve
      */
-    public static void approveApplication(String applicationId){
+    public void approveApplication(String applicationId){
         try {
 
-            Entity applicationToApprove = DatabaseManager.getEntryById(APPLICATION_FILE, applicationId, "Application");
+            Entity applicationToApprove = entityStore.findById(APPLICATION_FILE, applicationId, "Application");
             String internshipId = applicationToApprove.getArrayValueByIndex(2);
-            Entity internshipToChange = DatabaseManager.getEntryById(INTERNSHIP_FILE, internshipId, "Internship");
+            Entity internshipToChange = entityStore.findById(INTERNSHIP_FILE, internshipId, "Internship");
             String internshipSlots = internshipToChange.getArrayValueByIndex(10);
 
             String applicationStatus = applicationToApprove.getArrayValueByIndex(3);
@@ -69,8 +74,8 @@ public class ApplicationHandler {
                     internshipToChange.setArrayValueByIndex(7, "FILLED");
                 }
 
-                DatabaseManager.updateEntry(INTERNSHIP_FILE, internshipId, internshipToChange, "Internship");
-                DatabaseManager.updateEntry(APPLICATION_FILE, applicationId, applicationToApprove, "Application");
+                entityStore.update(INTERNSHIP_FILE, internshipId, internshipToChange, "Internship");
+                entityStore.update(APPLICATION_FILE, applicationId, applicationToApprove, "Application");
             }
 
         } catch (Exception e) {
@@ -83,20 +88,20 @@ public class ApplicationHandler {
      *
      * @param applicationId identifier of the application to accept
      */
-    public static void acceptApplication(String applicationId){
+    public void acceptApplication(String applicationId){
         try {
-            Entity applicationToAccept = DatabaseManager.getEntryById(APPLICATION_FILE, applicationId, "Application");
-            Entity internshipToAccept = DatabaseManager.getEntryById(INTERNSHIP_FILE,applicationToAccept.getArrayValueByIndex(2),"Internship");
+            Entity applicationToAccept = entityStore.findById(APPLICATION_FILE, applicationId, "Application");
+            Entity internshipToAccept = entityStore.findById(INTERNSHIP_FILE,applicationToAccept.getArrayValueByIndex(2),"Internship");
             String applicationCompany = internshipToAccept.getArrayValueByIndex(8);
 
             String applicationStatus = applicationToAccept.getArrayValueByIndex(3);
             if (applicationStatus.equals("Approved")) {
                 applicationToAccept.setArrayValueByIndex(3, "Accepted");
-                DatabaseManager.updateEntry(APPLICATION_FILE, applicationId, applicationToAccept, "Application");
+                entityStore.update(APPLICATION_FILE, applicationId, applicationToAccept, "Application");
                 String studentId = applicationToAccept.getArrayValueByIndex(1);
-                Entity thisStudent = DatabaseManager.getEntryById(STUDENT_FILE,studentId,"Student");
+                Entity thisStudent = entityStore.findById(STUDENT_FILE,studentId,"Student");
                 thisStudent.setArrayValueByIndex(9,applicationCompany);
-                DatabaseManager.updateEntry(STUDENT_FILE,studentId,thisStudent,"Student");
+                entityStore.update(STUDENT_FILE,studentId,thisStudent,"Student");
 
             }
 

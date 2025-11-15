@@ -17,11 +17,11 @@ public abstract class StudentController extends UserController {
     /**
      * Loads student metadata and validates the identifier.
      */
-    public StudentController(Router router, java.util.Scanner scanner, String studentID) throws InvalidStudentIDException {
-        super(router, scanner, studentID);
+    public StudentController(Router router, java.util.Scanner scanner, EntityStore entityStore, String studentID) throws InvalidStudentIDException {
+        super(router, scanner, entityStore, studentID);
         this.studentID = studentID;
 
-        StudentEntity student = StudentFilterService.loadStudent(studentID);
+        StudentEntity student = StudentFilterService.loadStudent(entityStore, studentID);
         if (student == null) {
             throw new InvalidStudentIDException("Invalid student ID: " + studentID);
         }

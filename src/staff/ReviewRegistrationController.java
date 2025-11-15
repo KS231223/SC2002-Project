@@ -24,8 +24,8 @@ public class ReviewRegistrationController extends Controller {
      * @param filters shared staff filter state to apply
      */
     @SuppressWarnings("LeakingThisInConstructor")
-    public ReviewRegistrationController(Router router, Scanner scanner, String staffID, StaffReviewFilters filters) {
-        super(router, scanner);
+    public ReviewRegistrationController(Router router, Scanner scanner, EntityStore entityStore, String staffID, StaffReviewFilters filters) {
+        super(router, scanner, entityStore);
         this.display = new ReviewRegistrationDisplay(this);
         this.filters = filters;
         router.push(this);
@@ -37,7 +37,7 @@ public class ReviewRegistrationController extends Controller {
      */
     @Override
     public void initialize() {
-        List<Entity> pendingRaw = DatabaseManager.getDatabase(PENDING_CR_FILE, new ArrayList<>(), "CR");
+        List<Entity> pendingRaw = entityStore.loadAll(PENDING_CR_FILE, "CR");
         List<CREntity> pending = new ArrayList<>();
         for (Entity entity : pendingRaw) {
             if (entity instanceof CREntity cr && filters.matchesRegistration(cr)) {
@@ -70,11 +70,11 @@ public class ReviewRegistrationController extends Controller {
         String choice = display.get_user_input().trim().toUpperCase();
 
         if (choice.equals("A")) {
-            DatabaseManager.appendEntry(CR_FILE, selected);
-            DatabaseManager.appendEntry(USER_FILE, userEntityToAppend);
+            entityStore.append(CR_FILE, selected);
+            entityStore.append(USER_FILE, userEntityToAppend);
         }
         if (choice.equals("A") || choice.equals("R")){
-            DatabaseManager.deleteEntry(PENDING_CR_FILE, crId, "CR");
+            entityStore.delete(PENDING_CR_FILE, crId, "CR");
         }
         System.out.println("\nReview complete.");
         router.pop();

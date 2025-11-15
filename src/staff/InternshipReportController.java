@@ -2,8 +2,8 @@ package staff;
 
 import common.ApplicationEntity;
 import common.Controller;
-import common.DatabaseManager;
 import common.Entity;
+import common.EntityStore;
 import common.InternshipEntity;
 import common.PathResolver;
 import common.Router;
@@ -40,8 +40,8 @@ public class InternshipReportController extends Controller {
      * @param filters shared filters limiting the data included in the report
      */
     @SuppressWarnings("LeakingThisInConstructor")
-    public InternshipReportController(Router router, Scanner scanner, String staffId, StaffReviewFilters filters) {
-        super(router, scanner);
+    public InternshipReportController(Router router, Scanner scanner, EntityStore entityStore, String staffId, StaffReviewFilters filters) {
+        super(router, scanner, entityStore);
         this.staffId = staffId;
         this.filters = filters;
         this.display = new InternshipReportDisplay(this);
@@ -68,7 +68,7 @@ public class InternshipReportController extends Controller {
      */
     private List<InternshipEntity> loadInternships() {
         List<InternshipEntity> internships = new ArrayList<>();
-        List<Entity> rawInternships = DatabaseManager.getDatabase(INTERNSHIP_FILE, new ArrayList<>(), "Internship");
+        List<Entity> rawInternships = entityStore.loadAll(INTERNSHIP_FILE, "Internship");
         for (Entity entity : rawInternships) {
             if (entity instanceof InternshipEntity internship) {
                 internships.add(internship);
@@ -85,7 +85,7 @@ public class InternshipReportController extends Controller {
     private StaffReviewFilters.ApplicationStats loadApplicationStats() {
         Map<String, Long> totalCounts = new HashMap<>();
         Map<String, Long> acceptedCounts = new HashMap<>();
-        List<Entity> rawApplications = DatabaseManager.getDatabase(APPLICATION_FILE, new ArrayList<>(), "Application");
+        List<Entity> rawApplications = entityStore.loadAll(APPLICATION_FILE, "Application");
         for (Entity entity : rawApplications) {
             if (entity instanceof ApplicationEntity application) {
                 String internshipId = application.get(ApplicationEntity.ApplicationField.InternshipID);

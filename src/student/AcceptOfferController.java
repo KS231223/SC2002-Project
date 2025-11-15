@@ -22,8 +22,8 @@ public class AcceptOfferController extends StudentController {
      * @throws InvalidStudentIDException when {@code studentID} cannot be resolved
      */
     @SuppressWarnings("LeakingThisInConstructor")
-    public AcceptOfferController(Router router, Scanner scanner, String studentID) throws InvalidStudentIDException {
-        super(router, scanner, studentID);
+    public AcceptOfferController(Router router, Scanner scanner, EntityStore entityStore, String studentID) throws InvalidStudentIDException {
+        super(router, scanner, entityStore, studentID);
         this.display = new AcceptOfferDisplay(this);
         router.push(this);
     }
@@ -34,13 +34,13 @@ public class AcceptOfferController extends StudentController {
      */
     @Override
     public void initialize() {
-        StudentEntity thisStudent = StudentFilterService.loadStudent(studentID);
+        StudentEntity thisStudent = StudentFilterService.loadStudent(entityStore, studentID);
         if (thisStudent == null) {
             System.err.println("This student does not exist");
             router.pop();
             return;
         }
-        List<Entity> applications = DatabaseManager.getDatabase(APPLICATION_FILE, new ArrayList<>(), "Application");
+        List<Entity> applications = entityStore.loadAll(APPLICATION_FILE, "Application");
         List<Entity> offers = new ArrayList<>();
 
         for (Entity e : applications) {
@@ -69,7 +69,7 @@ public class AcceptOfferController extends StudentController {
             return;
         }
 
-        Entity offer = DatabaseManager.getEntryById(APPLICATION_FILE, trimmedId, "Application");
+        Entity offer = entityStore.findById(APPLICATION_FILE, trimmedId, "Application");
         if (offer == null || !offer.getArrayValueByIndex(1).equals(userID)) {
             System.out.println("Invalid application ID.");
             router.pop();
@@ -78,9 +78,9 @@ public class AcceptOfferController extends StudentController {
 
         // Update status
         offer.setArrayValueByIndex(3,"Accepted");
-        DatabaseManager.updateEntry(APPLICATION_FILE, trimmedId, offer, "Application");
+        entityStore.update(APPLICATION_FILE, trimmedId, offer, "Application");
         thisStudent.set(StudentEntity.StudentField.AcceptedInternshipID, offer.getArrayValueByIndex(2));
-        StudentFilterService.saveStudent(thisStudent);
+        StudentFilterService.saveStudent(entityStore, thisStudent);
         this.acceptedInternshipID = offer.getArrayValueByIndex(2);
         System.out.println("Offer accepted successfully!");
         router.pop();

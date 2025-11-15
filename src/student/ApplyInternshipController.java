@@ -28,8 +28,8 @@ public class ApplyInternshipController extends StudentController {
      * @throws InvalidStudentIDException when {@code studentID} is invalid
      */
     @SuppressWarnings("LeakingThisInConstructor")
-    public ApplyInternshipController(Router router, Scanner scanner, String studentID) throws InvalidStudentIDException {
-        super(router, scanner, studentID);
+    public ApplyInternshipController(Router router, Scanner scanner, EntityStore entityStore, String studentID) throws InvalidStudentIDException {
+        super(router, scanner, entityStore, studentID);
         this.display = new ApplyInternshipDisplay(this);
         router.push(this);
     }
@@ -40,7 +40,7 @@ public class ApplyInternshipController extends StudentController {
      */
     @Override
     public void initialize() {
-        List<Entity> internships = DatabaseManager.getDatabase(INTERNSHIP_FILE, new ArrayList<>(), "Internship");
+        List<Entity> internships = entityStore.loadAll(INTERNSHIP_FILE, "Internship");
         List<InternshipEntity> visibleInternships = new ArrayList<>();
         for (Entity entity : internships) {
             InternshipEntity internship = (InternshipEntity) entity;
@@ -69,7 +69,7 @@ public class ApplyInternshipController extends StudentController {
             return;
         }
 
-        Entity internship = DatabaseManager.getEntryById(INTERNSHIP_FILE, trimmedId, "Internship");
+        Entity internship = entityStore.findById(INTERNSHIP_FILE, trimmedId, "Internship");
         InternshipEntity selectedInternship = (InternshipEntity) internship;
         if (selectedInternship == null || !isVisible(selectedInternship)) {
             System.out.println("Invalid or unavailable Internship ID. Returning...");
@@ -97,7 +97,7 @@ public class ApplyInternshipController extends StudentController {
             router.pop();
             return;
         }
-        Entity thisStudent = DatabaseManager.getEntryById(STUDENT_FILE,userID,"Student");
+        Entity thisStudent = entityStore.findById(STUDENT_FILE, userID, "Student");
         if (thisStudent == null) {
             System.err.println("This student not found in database.");
             router.pop();
@@ -111,7 +111,7 @@ public class ApplyInternshipController extends StudentController {
 
             if (beforeDeadline && eligibleByYear) {
                 ApplicationEntity newApp = new ApplicationEntity(applicationId, userID, trimmedId, "Pending", formattedDate);
-                DatabaseManager.appendEntry(APPLICATION_FILE, newApp);
+                entityStore.append(APPLICATION_FILE, newApp);
 
                 System.out.println("Application submitted successfully!");
                 router.pop();

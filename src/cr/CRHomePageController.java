@@ -23,8 +23,8 @@ public class CRHomePageController extends CRController {
      * @throws InvalidCompanyRepIDException when {@code crID} cannot be resolved
      */
     @SuppressWarnings("LeakingThisInConstructor")
-    public CRHomePageController(Router router, Scanner scanner, String crID) throws InvalidCompanyRepIDException {
-        super(router, scanner, crID);
+    public CRHomePageController(Router router, Scanner scanner, EntityStore entityStore, String crID) throws InvalidCompanyRepIDException {
+        super(router, scanner, entityStore, crID);
         this.crDisplay = new CRHomeDisplay(this);
         router.replace(this); // swap to this controller
     }
@@ -49,17 +49,17 @@ public class CRHomePageController extends CRController {
             String choice = crDisplay.get_user_input();
             try {
                 switch (choice) {
-                    case "1" -> new ListMyInternshipsController(router, scanner, userID);
-                    case "2" -> new CreateInternshipController(router, scanner, userID);
-                    case "3" -> new ToggleVisibilityController(router, scanner, userID);
-                    case "4" -> new ViewApplicationsController(router, scanner, userID);
-                    case "5" -> new ReviewApplicationController(router, scanner, userID);
-                    case "6" -> new FilterInternshipsController(router, scanner, userID);
+                    case "1" -> new ListMyInternshipsController(router, scanner, entityStore, userID);
+                    case "2" -> new CreateInternshipController(router, scanner, entityStore, userID);
+                    case "3" -> new ToggleVisibilityController(router, scanner, entityStore, userID);
+                    case "4" -> new ViewApplicationsController(router, scanner, entityStore, userID);
+                    case "5" -> new ReviewApplicationController(router, scanner, entityStore, userID);
+                    case "6" -> new FilterInternshipsController(router, scanner, entityStore, userID);
                     case "7" -> {
                         CRFilterService.clearFilters(userID);
                         System.out.println("Internship filters cleared.");
                     }
-                    case "8" -> new PasswordChanger(router, scanner, userID); // run change password
+                    case "8" -> new PasswordChanger(router, scanner, entityStore, userID); // run change password
                     case "9" -> {
                         System.out.println("Logging out...");
                         router.pop();

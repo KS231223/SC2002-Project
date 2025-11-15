@@ -24,11 +24,11 @@ public abstract class CRController extends UserController {
      * @param companyRepID identifier of the logged-in company representative
      * @throws InvalidCompanyRepIDException when the identifier cannot be found or the data file is missing
      */
-    public CRController(Router router,Scanner scanner, String companyRepID) throws InvalidCompanyRepIDException {
-        super(router, scanner,companyRepID);
+    public CRController(Router router, Scanner scanner, EntityStore entityStore, String companyRepID) throws InvalidCompanyRepIDException {
+        super(router, scanner, entityStore, companyRepID);
         this.companyRepID = companyRepID;
 
-        Entity entity = DatabaseManager.getEntryById(PathResolver.resource("cr.csv"), companyRepID, "CR");
+        Entity entity = entityStore.findById(PathResolver.resource("cr.csv"), companyRepID, "CR");
         if (entity == null) {
             throw new InvalidCompanyRepIDException("Invalid company representative ID: " + companyRepID);
         }
