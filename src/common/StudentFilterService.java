@@ -73,6 +73,10 @@ public final class StudentFilterService {
         if (internship == null || filters == null) {
             return false;
         }
+        String visibility = internship.get(InternshipEntity.InternshipField.Visibility);
+        if (visibility == null || !"VISIBLE".equalsIgnoreCase(visibility.trim())) {
+            return false;
+        }
         if (filters.hasLevel() && !equalsIgnoreCase(internship.get(InternshipEntity.InternshipField.Level), filters.level())) {
             return false;
         }
