@@ -306,9 +306,6 @@ class EntityRepository {
 public class DatabaseManager implements EntityStore {
     private final EntityRepository repository;
 
-    private static final DatabaseManager DEFAULT_INSTANCE =
-            new DatabaseManager(new EntityRepository(new StandardFileOperations()));
-
     /**
      * Builds a database manager backed by the default file operations.
      */
@@ -328,12 +325,6 @@ public class DatabaseManager implements EntityStore {
     /**
      * Populates the provided list with the entities stored in {@code filePath}.
      */
-    public List<Entity> loadAllInto(String filePath, List<Entity> outList, String entityType) {
-        outList.clear();
-        outList.addAll(loadAll(filePath, entityType));
-        return outList;
-    }
-
     @Override
     public Entity findById(String filePath, String id, String entityType) {
         List<Entity> list = loadAll(filePath, entityType);
@@ -357,35 +348,5 @@ public class DatabaseManager implements EntityStore {
         List<Entity> list = loadAll(filePath, entityType);
         list = repository.removeById(list, id);
         repository.saveEntities(filePath, list);
-    }
-
-    /**
-     * Legacy convenience: maintains the previous static API for existing callers.
-     */
-    public static List<Entity> getDatabase(String filePath, List<Entity> outList, String entityType) {
-        return DEFAULT_INSTANCE.loadAllInto(filePath, outList, entityType);
-    }
-
-    public static void appendEntry(String filePath, Entity entry) {
-        DEFAULT_INSTANCE.append(filePath, entry);
-    }
-
-    public static void updateEntry(String filePath, String id, Entity newEntry, String entityType) {
-        DEFAULT_INSTANCE.update(filePath, id, newEntry, entityType);
-    }
-
-    public static Entity getEntryById(String filePath, String id, String entityType) {
-        return DEFAULT_INSTANCE.findById(filePath, id, entityType);
-    }
-
-    public static void deleteEntry(String filePath, String id, String entityType) {
-        DEFAULT_INSTANCE.delete(filePath, id, entityType);
-    }
-
-    /**
-     * Exposes the default instance for wiring code that prefers dependency injection.
-     */
-    public static EntityStore defaultStore() {
-        return DEFAULT_INSTANCE;
     }
 }

@@ -2,10 +2,12 @@ C:\Users\LeeJR\Desktop\2002\SC2002-Project\src\common\ApplicationEntity.java
 C:\Users\LeeJR\Desktop\2002\SC2002-Project\src\common\ApplicationHandler.java
 C:\Users\LeeJR\Desktop\2002\SC2002-Project\src\common\Controller.java
 C:\Users\LeeJR\Desktop\2002\SC2002-Project\src\common\CRController.java
+C:\Users\LeeJR\Desktop\2002\SC2002-Project\src\common\CRFilterService.java
 C:\Users\LeeJR\Desktop\2002\SC2002-Project\src\common\CREntity.java
 C:\Users\LeeJR\Desktop\2002\SC2002-Project\src\common\DatabaseManager.java
 C:\Users\LeeJR\Desktop\2002\SC2002-Project\src\common\Display.java
 C:\Users\LeeJR\Desktop\2002\SC2002-Project\src\common\Entity.java
+C:\Users\LeeJR\Desktop\2002\SC2002-Project\src\common\EntityStore.java
 C:\Users\LeeJR\Desktop\2002\SC2002-Project\src\common\EntitySorter.java
 C:\Users\LeeJR\Desktop\2002\SC2002-Project\src\common\InternshipEntity.java
 C:\Users\LeeJR\Desktop\2002\SC2002-Project\src\common\PasswordChanger.java
@@ -20,6 +22,7 @@ C:\Users\LeeJR\Desktop\2002\SC2002-Project\src\common\UserController.java
 C:\Users\LeeJR\Desktop\2002\SC2002-Project\src\common\UserEntity.java
 C:\Users\LeeJR\Desktop\2002\SC2002-Project\src\cr\CreateInternshipController.java
 C:\Users\LeeJR\Desktop\2002\SC2002-Project\src\cr\CRHomePageController.java
+C:\Users\LeeJR\Desktop\2002\SC2002-Project\src\cr\FilterInternshipsController.java
 C:\Users\LeeJR\Desktop\2002\SC2002-Project\src\cr\ListMyInternshipsController.java
 C:\Users\LeeJR\Desktop\2002\SC2002-Project\src\cr\ReviewApplicationController.java
 C:\Users\LeeJR\Desktop\2002\SC2002-Project\src\cr\ToggleVisibilityController.java
@@ -36,6 +39,8 @@ C:\Users\LeeJR\Desktop\2002\SC2002-Project\src\ims\TestScenarioMain.java
 C:\Users\LeeJR\Desktop\2002\SC2002-Project\src\staff\ReviewInternshipController.java
 C:\Users\LeeJR\Desktop\2002\SC2002-Project\src\staff\ReviewRegistrationController.java
 C:\Users\LeeJR\Desktop\2002\SC2002-Project\src\staff\ReviewWithdrawalController.java
+C:\Users\LeeJR\Desktop\2002\SC2002-Project\src\staff\StaffReviewFilters.java
+C:\Users\LeeJR\Desktop\2002\SC2002-Project\src\staff\InternshipReportController.java
 C:\Users\LeeJR\Desktop\2002\SC2002-Project\src\staff\StaffHomePageController.java
 C:\Users\LeeJR\Desktop\2002\SC2002-Project\src\student\AcceptOfferController.java
 C:\Users\LeeJR\Desktop\2002\SC2002-Project\src\student\ApplyInternshipController.java
