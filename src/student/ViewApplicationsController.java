@@ -44,8 +44,7 @@ public class ViewApplicationsController extends StudentController {
         }
 
         display.print_list(myApps);
-        System.out.println("\nPress Enter to return...");
-        display.get_user_input();
+        display.prompt_to_return();
         router.pop();
     }
 }
@@ -78,8 +77,39 @@ class ViewApplicationsDisplay extends Display {
             System.out.println("You have no applications.");
             return;
         }
+        int index = 1;
         for (Entity e : apps) {
-            System.out.println(e.toString());
+            ApplicationEntity application = (ApplicationEntity) e;
+            System.out.printf("%d) Application: %s%n", index++, fallback(application.get(ApplicationEntity.ApplicationField.ApplicationID)));
+            System.out.printf("   Internship ID: %s | Status: %s%n",
+                fallback(application.get(ApplicationEntity.ApplicationField.InternshipID)),
+                fallback(application.get(ApplicationEntity.ApplicationField.Status), "N/A"));
+            System.out.printf("   Submitted: %s%n",
+                fallback(application.get(ApplicationEntity.ApplicationField.SubmissionDate), "N/A"));
+            System.out.println();
+        }
+    }
+
+    private String fallback(String value) {
+        return fallback(value, "");
+    }
+
+    private String fallback(String value, String defaultValue) {
+        if (value == null) {
+            return defaultValue;
+        }
+        String trimmed = value.trim();
+        if (trimmed.isEmpty()) {
+            return defaultValue;
+        }
+        return trimmed;
+    }
+
+    public void prompt_to_return() {
+        System.out.println("\nPress Enter to return or type B to go back...");
+        String input = get_user_input();
+        if (input != null && "b".equalsIgnoreCase(input.trim())) {
+            // allowed to simply return; controller handles navigation
         }
     }
 }

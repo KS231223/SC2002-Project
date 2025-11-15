@@ -53,8 +53,19 @@ public class WithdrawalRequestController extends StudentController {
 
         display.print_list(myApps);
         String appId = display.ask_app_id();
+        if (appId == null) {
+            System.out.println("No input captured. Returning...");
+            router.pop();
+            return;
+        }
 
-        Entity app = DatabaseManager.getEntryById(APPLICATION_FILE, appId, "Application");
+        String trimmedId = appId.trim();
+        if ("b".equalsIgnoreCase(trimmedId)) {
+            router.pop();
+            return;
+        }
+
+        Entity app = DatabaseManager.getEntryById(APPLICATION_FILE, trimmedId, "Application");
         if (app == null || !app.getArrayValueByIndex(1).equals(userID)) {
             System.out.println("Invalid application ID.");
             router.pop();
@@ -90,8 +101,16 @@ class WithdrawalDisplay extends Display {
      */
     public void print_list(List<Entity> apps) {
         System.out.println("=== My Applications ===");
+        int index = 1;
         for (Entity e : apps) {
-            System.out.println(e.toString());
+            ApplicationEntity application = (ApplicationEntity) e;
+            System.out.printf("%d) Application: %s%n", index++, fallback(application.get(ApplicationEntity.ApplicationField.ApplicationID)));
+            System.out.printf("   Internship ID: %s | Status: %s%n",
+                fallback(application.get(ApplicationEntity.ApplicationField.InternshipID)),
+                fallback(application.get(ApplicationEntity.ApplicationField.Status), "N/A"));
+            System.out.printf("   Submitted: %s%n",
+                fallback(application.get(ApplicationEntity.ApplicationField.SubmissionDate), "N/A"));
+            System.out.println();
         }
     }
 
@@ -101,7 +120,22 @@ class WithdrawalDisplay extends Display {
      * @return user-provided application identifier
      */
     public String ask_app_id() {
-        System.out.print("Enter Application ID to withdraw: ");
+        System.out.print("Enter Application ID to withdraw (or B to go back): ");
         return get_user_input();
+    }
+
+    private String fallback(String value) {
+        return fallback(value, "");
+    }
+
+    private String fallback(String value, String defaultValue) {
+        if (value == null) {
+            return defaultValue;
+        }
+        String trimmed = value.trim();
+        if (trimmed.isEmpty()) {
+            return defaultValue;
+        }
+        return trimmed;
     }
 }

@@ -41,18 +41,38 @@ public class ApplyInternshipController extends StudentController {
     @Override
     public void initialize() {
         List<Entity> internships = DatabaseManager.getDatabase(INTERNSHIP_FILE, new ArrayList<>(), "Internship");
-        if (internships.isEmpty()) {
+        List<InternshipEntity> visibleInternships = new ArrayList<>();
+        for (Entity entity : internships) {
+            InternshipEntity internship = (InternshipEntity) entity;
+            if (isVisible(internship)) {
+                visibleInternships.add(internship);
+            }
+        }
+
+        if (visibleInternships.isEmpty()) {
             System.out.println("No internships available.");
             router.pop();
             return;
         }
 
-        display.print_list(internships);
+        display.print_list(visibleInternships);
         String internshipId = display.ask_internship_id();
+        if (internshipId == null) {
+            System.out.println("No input captured. Returning...");
+            router.pop();
+            return;
+        }
 
-        Entity internship = DatabaseManager.getEntryById(INTERNSHIP_FILE, internshipId, "Internship");
-        if (internship == null) {
-            System.out.println("Invalid Internship ID. Returning...");
+        String trimmedId = internshipId.trim();
+        if ("b".equalsIgnoreCase(trimmedId)) {
+            router.pop();
+            return;
+        }
+
+        Entity internship = DatabaseManager.getEntryById(INTERNSHIP_FILE, trimmedId, "Internship");
+        InternshipEntity selectedInternship = (InternshipEntity) internship;
+        if (selectedInternship == null || !isVisible(selectedInternship)) {
+            System.out.println("Invalid or unavailable Internship ID. Returning...");
             router.pop();
             return;
         }
@@ -71,7 +91,7 @@ public class ApplyInternshipController extends StudentController {
         LocalDate date1 = LocalDate.parse(formattedDate);
         LocalDate date2;
         try {
-            date2 = LocalDate.parse(internship.getArrayValueByIndex(6), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            date2 = LocalDate.parse(selectedInternship.get(InternshipEntity.InternshipField.CloseDate), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         } catch (Exception e) {
             System.err.println("Invalid internship close date format.");
             router.pop();
@@ -84,8 +104,13 @@ public class ApplyInternshipController extends StudentController {
             return;
         }
         try {
-            if (date1.isBefore(date2) && YearChecker.checkYear(thisStudent.getArrayValueByIndex(3), internship.getArrayValueByIndex(3))) {
-                ApplicationEntity newApp = new ApplicationEntity(applicationId, userID, internshipId, "Pending", formattedDate);
+            String studentYear = optionalTrim(thisStudent.getArrayValueByIndex(3));
+            String internshipLevel = optionalTrim(selectedInternship.get(InternshipEntity.InternshipField.Level));
+            boolean beforeDeadline = date1.isBefore(date2);
+            boolean eligibleByYear = YearChecker.checkYear(studentYear, internshipLevel);
+
+            if (beforeDeadline && eligibleByYear) {
+                ApplicationEntity newApp = new ApplicationEntity(applicationId, userID, trimmedId, "Pending", formattedDate);
                 DatabaseManager.appendEntry(APPLICATION_FILE, newApp);
 
                 System.out.println("Application submitted successfully!");
@@ -93,8 +118,18 @@ public class ApplyInternshipController extends StudentController {
             }
             else{
                 System.out.println("Application Unsuccessful.");
-                if(date1.isBefore(date2)) System.out.println("Unable to apply for non-basic courses at current year.");
-                else System.out.println("Passed application deadline.");
+                if (!beforeDeadline) {
+                    System.out.println("Passed application deadline.");
+                } else {
+                    String displayLevel = internshipLevel.isEmpty() ? "this internship" : "the " + internshipLevel + " internship";
+                    if (studentYear.isEmpty()) {
+                        System.out.printf("Your current year allows applications only to Basic internships; %s requires a higher level.%n",
+                            displayLevel);
+                    } else {
+                        System.out.printf("Students in Year %s may only apply to Basic internships; %s requires a higher level.%n",
+                            studentYear, displayLevel);
+                    }
+                }
             }
         }
         catch (Exception e){
@@ -102,6 +137,21 @@ public class ApplyInternshipController extends StudentController {
             router.pop();
         }
 
+    }
+
+    private static boolean isVisible(InternshipEntity internship) {
+        if (internship == null) {
+            return false;
+        }
+        String visibility = internship.get(InternshipEntity.InternshipField.Visibility);
+        return visibility == null || !"Hidden".equalsIgnoreCase(visibility.trim());
+    }
+
+    private static String optionalTrim(String value) {
+        if (value == null) {
+            return "";
+        }
+        return value.trim();
     }
 
     /**
@@ -141,10 +191,27 @@ class ApplyInternshipDisplay extends Display {
      *
      * @param internships internships pulled from storage
      */
-    public void print_list(List<Entity> internships) {
+    public void print_list(List<InternshipEntity> internships) {
         System.out.println("=== Available Internships ===");
-        for (Entity e : internships) {
-            System.out.println(e.toString());
+        int index = 1;
+        for (InternshipEntity internship : internships) {
+            System.out.printf("%d) %s%n", index++, fallback(internship.get(InternshipEntity.InternshipField.Title)));
+            System.out.printf("   ID: %s | Company: %s | Level: %s%n",
+                fallback(internship.get(InternshipEntity.InternshipField.InternshipID)),
+                fallback(internship.get(InternshipEntity.InternshipField.CompanyName)),
+                fallback(internship.get(InternshipEntity.InternshipField.Level)));
+            System.out.printf("   Major: %s | Slots: %s%n",
+                fallback(internship.get(InternshipEntity.InternshipField.PreferredMajor), "N/A"),
+                fallback(internship.get(InternshipEntity.InternshipField.Slots), "N/A"));
+            System.out.printf("   Open: %s | Close: %s | Status: %s%n",
+                fallback(internship.get(InternshipEntity.InternshipField.OpenDate), "N/A"),
+                fallback(internship.get(InternshipEntity.InternshipField.CloseDate), "N/A"),
+                fallback(internship.get(InternshipEntity.InternshipField.Status), "N/A"));
+            String description = fallback(internship.get(InternshipEntity.InternshipField.Description));
+            if (!description.isEmpty()) {
+                System.out.println("   Description: " + description);
+            }
+            System.out.println();
         }
     }
 
@@ -154,7 +221,22 @@ class ApplyInternshipDisplay extends Display {
      * @return provided internship identifier
      */
     public String ask_internship_id() {
-        System.out.print("Enter Internship ID to apply: ");
+        System.out.print("Enter Internship ID to apply (or B to go back): ");
         return get_user_input();
+    }
+
+    private String fallback(String value) {
+        return fallback(value, "");
+    }
+
+    private String fallback(String value, String defaultValue) {
+        if (value == null) {
+            return defaultValue;
+        }
+        String trimmed = value.trim();
+        if (trimmed.isEmpty()) {
+            return defaultValue;
+        }
+        return trimmed;
     }
 }

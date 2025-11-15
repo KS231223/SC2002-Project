@@ -1,8 +1,6 @@
 package common;
 
 import exceptions.*;
-import java.io.File;
-import java.io.IOException;
 import java.util.Scanner;
 
 
@@ -30,42 +28,17 @@ public abstract class CRController extends UserController {
         super(router, scanner,companyRepID);
         this.companyRepID = companyRepID;
 
-        File file = new File(PathResolver.resource("cr.csv"));
-        boolean found = false;
-
-        if (!file.exists()) {
-            throw new InvalidCompanyRepIDException("Company representative database not found.");
-        }
-
-        try (Scanner reader = new Scanner(file)) {
-            while (reader.hasNextLine()) {
-                String line = reader.nextLine().trim();
-                if (line.isEmpty()) {
-                    continue;
-                }
-
-                String[] parts = line.split(","); // CompanyRepID,Name,CompanyName,Department,Position,Email
-                if (parts.length < 6) {
-                    continue;
-                }
-
-                if (parts[0].equals(companyRepID)) {
-                    this.name = parts[1];
-                    this.companyName = parts[2];
-                    this.department = parts[3];
-                    this.position = parts[4];
-                    this.email = parts[5];
-                    found = true;
-                    break;
-                }
-            }
-        } catch (IOException e) {
-            throw new InvalidCompanyRepIDException("Error reading company_reps.csv: " + e.getMessage());
-        }
-
-        if (!found) {
+        Entity entity = DatabaseManager.getEntryById(PathResolver.resource("cr.csv"), companyRepID, "CR");
+        if (entity == null) {
             throw new InvalidCompanyRepIDException("Invalid company representative ID: " + companyRepID);
         }
+
+        CREntity crEntity = (CREntity) entity;
+        this.name = requiredValue(crEntity.get(CREntity.CRField.Name), companyRepID);
+        this.companyName = requiredValue(crEntity.get(CREntity.CRField.CompanyName), "");
+        this.department = requiredValue(crEntity.get(CREntity.CRField.Department), "");
+        this.position = requiredValue(crEntity.get(CREntity.CRField.Position), "");
+        this.email = requiredValue(crEntity.get(CREntity.CRField.Email), "");
     }
 
     @Override
@@ -77,6 +50,17 @@ public abstract class CRController extends UserController {
     public void printCRInfo() {
         System.out.printf("ID: %s\nName: %s\nCompany: %s\nDepartment: %s\nPosition: %s\nEmail: %s\n",
                 companyRepID, name, companyName, department, position, email);
+    }
+
+    private String requiredValue(String value, String fallback) {
+        if (value == null) {
+            return fallback;
+        }
+        String trimmed = value.trim();
+        if (trimmed.isEmpty()) {
+            return fallback;
+        }
+        return trimmed;
     }
 }
 
