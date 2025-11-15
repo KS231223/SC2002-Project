@@ -3,6 +3,9 @@ package staff;
 import common.*;
 import java.util.*;
 
+/**
+ * Handles review of pending company representative registrations.
+ */
 public class ReviewRegistrationController extends Controller {
     private final ReviewRegistrationDisplay display;
     private final StaffReviewFilters filters;
@@ -12,6 +15,14 @@ public class ReviewRegistrationController extends Controller {
         PathResolver.resource("cr.csv");
     private static final String USER_FILE =
         PathResolver.resource("users.csv");
+    /**
+     * Creates a controller for processing pending registrations.
+     *
+     * @param router  application router used for navigation
+     * @param scanner shared input reader
+     * @param staffID identifier of the reviewing staff member
+     * @param filters shared staff filter state to apply
+     */
     @SuppressWarnings("LeakingThisInConstructor")
     public ReviewRegistrationController(Router router, Scanner scanner, String staffID, StaffReviewFilters filters) {
         super(router, scanner);
@@ -20,6 +31,10 @@ public class ReviewRegistrationController extends Controller {
         router.push(this);
     }
 
+    /**
+     * Loads pending registrations, applies filters, and prompts the reviewer to
+     * approve or reject a selected entry.
+     */
     @Override
     public void initialize() {
         List<Entity> pendingRaw = DatabaseManager.getDatabase(PENDING_CR_FILE, new ArrayList<>(), "CR");
@@ -65,24 +80,49 @@ public class ReviewRegistrationController extends Controller {
         router.pop();
     }
 }
+
+/**
+ * Display helper for the registration review flow.
+ */
 class ReviewRegistrationDisplay extends Display {
 
+    /**
+     * Creates a display facade for registration review.
+     *
+     * @param owner controller managing this display
+     */
     public ReviewRegistrationDisplay(Controller owner) {
         super(owner);
     }
 
+    /**
+     * Announces the registration review prompt.
+     */
     @Override
     public void print_menu() {
         System.out.println("Welcome! Choose Company Representative ID to Approve/Reject");
     }
+    /**
+     * Prints the selected registration entry and prompts for an approval decision.
+     *
+     * @param e entity awaiting review
+     */
     public void print_entry(Entity e){
         System.out.println("\nPending: " + e.toString());
         System.out.print("Approve (A) / Reject (R): ");
     }
+    /**
+     * Prompts the reviewer for the identifier of a registration.
+     */
     public void ask_for_id(){
         System.out.print("Which companyID do you wish to Approve/Reject?");
 
     }
+    /**
+     * Shows the list of pending registrations and prompts for selection.
+     *
+     * @param entityList registrations available for review
+     */
     public void print_list(List<? extends Entity> entityList){
         for (Entity e : entityList){
            System.out.println(e.toString());

@@ -6,23 +6,36 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-
+/**
+ * Guides company representatives through drafting a new internship submission.
+ */
 public class CreateInternshipController extends CRController {
 
-    private static final String INTERNSHIP_FILE =
-        PathResolver.resource("internship_opportunities.csv");
     private static final String CR_FILE =
         PathResolver.resource("cr.csv");
     private static final String PENDING_INTERNSHIP_FILE =
         PathResolver.resource("pending_internship_opportunities.csv");
-    private CreateInternshipDisplay display;
+    private final CreateInternshipDisplay display;
 
+    /**
+     * Creates a controller for collecting internship submission details.
+     *
+     * @param router router managing navigation
+     * @param scanner shared console input
+     * @param crID identifier of the logged-in company representative
+     * @throws InvalidCompanyRepIDException when {@code crID} cannot be resolved
+     */
+    @SuppressWarnings("LeakingThisInConstructor")
     public CreateInternshipController(Router router, Scanner scanner, String crID) throws InvalidCompanyRepIDException {
         super(router, scanner, crID);
         this.display = new CreateInternshipDisplay(this);
         router.push(this);
     }
 
+    /**
+     * Prompts the representative for internship details, performs validation,
+     * and records the submission for staff review.
+     */
     @Override
     public void initialize() {
         try {
@@ -83,11 +96,25 @@ public class CreateInternshipController extends CRController {
     }
 }
 
+/**
+ * Display helper capturing input for internship creation.
+ */
 class CreateInternshipDisplay extends Display {
+    /**
+     * Creates a display associated with the creation controller.
+     *
+     * @param owner owning controller
+     */
     public CreateInternshipDisplay(Controller owner) {
         super(owner);
     }
 
+    /**
+     * Prompts the user using the supplied message and returns trimmed input.
+     *
+     * @param msg prompt message
+     * @return trimmed response from the console
+     */
     public String ask(String msg) {
         System.out.print(msg);
         return get_user_input().trim();

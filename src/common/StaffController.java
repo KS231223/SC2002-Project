@@ -5,15 +5,20 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Scanner;
 
+/**
+ * Shared base for staff flows that preloads staff profile data from CSV.
+ */
 public abstract class StaffController extends UserController {
 
-    protected String staffID;
+    protected final String staffID;
     protected String name;
     protected String staffRole;
     protected String department;
     protected String email;
 
-    // Constructor that loads staff details based on StaffID
+    /**
+     * Loads staff metadata based on the provided identifier.
+     */
     public StaffController(Router router,Scanner scanner,String staffID) throws InvalidStaffIDException {
         super(router,scanner,staffID);
         this.staffID = staffID;
@@ -51,11 +56,12 @@ public abstract class StaffController extends UserController {
         }
     }
 
-    // Abstract initialize method from Controller
     @Override
     public abstract void initialize();
 
-    // Optional: helper method to display staff info
+    /**
+     * Prints the preloaded staff information for debugging or diagnostics.
+     */
     public void printStaffInfo() {
     System.out.printf("ID: %s\nName: %s\nRole: %s\nDepartment: %s\nEmail: %s\n",
         staffID, name, staffRole, department, email);

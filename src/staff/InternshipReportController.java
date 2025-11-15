@@ -31,6 +31,14 @@ public class InternshipReportController extends Controller {
     private final StaffReviewFilters filters;
     private final String staffId;
 
+    /**
+     * Builds a controller that generates a report backed by the shared filters.
+     *
+     * @param router  router managing navigation stack
+     * @param scanner shared input reader
+     * @param staffId identifier of the staff member requesting the report
+     * @param filters shared filters limiting the data included in the report
+     */
     @SuppressWarnings("LeakingThisInConstructor")
     public InternshipReportController(Router router, Scanner scanner, String staffId, StaffReviewFilters filters) {
         super(router, scanner);
@@ -40,6 +48,9 @@ public class InternshipReportController extends Controller {
         router.push(this);
     }
 
+    /**
+     * Loads data, generates the report summary, and displays it to the user.
+     */
     @Override
     public void initialize() {
         List<InternshipEntity> internships = loadInternships();
@@ -50,6 +61,11 @@ public class InternshipReportController extends Controller {
         router.pop();
     }
 
+    /**
+     * Retrieves all internship records from persistent storage.
+     *
+     * @return list of internships, potentially empty
+     */
     private List<InternshipEntity> loadInternships() {
         List<InternshipEntity> internships = new ArrayList<>();
         List<Entity> rawInternships = DatabaseManager.getDatabase(INTERNSHIP_FILE, new ArrayList<>(), "Internship");
@@ -61,6 +77,11 @@ public class InternshipReportController extends Controller {
         return internships;
     }
 
+    /**
+     * Builds aggregate application statistics for use in the report.
+     *
+     * @return application statistics keyed by internship ID
+     */
     private StaffReviewFilters.ApplicationStats loadApplicationStats() {
         Map<String, Long> totalCounts = new HashMap<>();
         Map<String, Long> acceptedCounts = new HashMap<>();
@@ -80,6 +101,13 @@ public class InternshipReportController extends Controller {
         return new StaffReviewFilters.ApplicationStats(totalCounts, acceptedCounts);
     }
 
+    /**
+     * Constructs a report summary applying the current filters to the provided data.
+     *
+     * @param internships internships to evaluate
+     * @param stats       application statistics supporting the report
+     * @return populated report summary
+     */
     private ReportSummary buildSummary(List<InternshipEntity> internships, StaffReviewFilters.ApplicationStats stats) {
         Map<String, Long> statusCounts = seedStatusCounts();
         Map<String, Long> placementCounts = seedPlacementCounts();
@@ -137,6 +165,11 @@ public class InternshipReportController extends Controller {
         );
     }
 
+    /**
+     * Initialises the status breakdown map with common statuses.
+     *
+     * @return map seeded with zero counts per status
+     */
     private Map<String, Long> seedStatusCounts() {
         Map<String, Long> counts = new LinkedHashMap<>();
         counts.put("Pending", 0L);
@@ -146,6 +179,11 @@ public class InternshipReportController extends Controller {
         return counts;
     }
 
+    /**
+     * Initialises the placement status breakdown map.
+     *
+     * @return map seeded with zero counts per placement state
+     */
     private Map<String, Long> seedPlacementCounts() {
         Map<String, Long> counts = new LinkedHashMap<>();
         counts.put("Filled", 0L);
@@ -153,10 +191,22 @@ public class InternshipReportController extends Controller {
         return counts;
     }
 
+    /**
+     * Increments the counter associated with the provided key.
+     *
+     * @param counts target counter map
+     * @param key    bucket to increment
+     */
     private void increment(Map<String, Long> counts, String key) {
         counts.merge(key, 1L, Long::sum);
     }
 
+    /**
+     * Formats raw status strings into human-readable labels.
+     *
+     * @param raw raw status value
+     * @return formatted status label
+     */
     private String formatStatus(String raw) {
         String normalized = normalize(raw);
         return switch (normalized) {
@@ -168,6 +218,13 @@ public class InternshipReportController extends Controller {
         };
     }
 
+    /**
+     * Returns a display value that falls back to the provided default when empty.
+     *
+     * @param value    value to display
+     * @param fallback fallback text when the value is blank
+     * @return formatted value suitable for output
+     */
     private String displayValue(String value, String fallback) {
         if (value == null) {
             return fallback;
@@ -176,6 +233,14 @@ public class InternshipReportController extends Controller {
         return trimmed.isEmpty() ? fallback : trimmed;
     }
 
+    /**
+     * Determines whether an internship should be considered filled based on
+     * slot capacity and accepted application counts.
+     *
+     * @param internship    internship under evaluation
+     * @param acceptedCount number of accepted applications
+     * @return {@code true} when the internship is filled
+     */
     private boolean isFilled(InternshipEntity internship, long acceptedCount) {
         String slotsValue = internship.get(InternshipEntity.InternshipField.Slots);
         try {
@@ -189,6 +254,13 @@ public class InternshipReportController extends Controller {
         }
     }
 
+    /**
+     * Updates aggregate date statistics for opening or closing dates.
+     *
+     * @param stats       date accumulator
+     * @param value       raw date value
+     * @param openingDate {@code true} when tracking opening dates
+     */
     private void updateDateStats(DateStats stats, String value, boolean openingDate) {
         LocalDate date = parseDate(value);
         if (date == null) {
@@ -201,6 +273,12 @@ public class InternshipReportController extends Controller {
         }
     }
 
+    /**
+     * Parses ISO-8601 date strings into {@link LocalDate} instances.
+     *
+     * @param value raw text to parse
+     * @return parsed date or {@code null} when invalid or blank
+     */
     private LocalDate parseDate(String value) {
         if (value == null || value.isBlank()) {
             return null;
@@ -212,16 +290,30 @@ public class InternshipReportController extends Controller {
         }
     }
 
+    /**
+     * Normalises values for case-insensitive comparisons.
+     *
+     * @param value raw text
+     * @return uppercase trimmed value or empty string when {@code null}
+     */
     private String normalize(String value) {
         return value == null ? "" : value.trim().toUpperCase(Locale.ROOT);
     }
 
+    /**
+     * Aggregates min/max opening and closing dates for the report output.
+     */
     private static final class DateStats {
         private LocalDate earliestOpen;
         private LocalDate latestOpen;
         private LocalDate earliestClose;
         private LocalDate latestClose;
 
+        /**
+         * Records an opening date, updating min/max trackers.
+         *
+         * @param date date to capture
+         */
         void recordOpen(LocalDate date) {
             if (earliestOpen == null || date.isBefore(earliestOpen)) {
                 earliestOpen = date;
@@ -231,6 +323,11 @@ public class InternshipReportController extends Controller {
             }
         }
 
+        /**
+         * Records a closing date, updating min/max trackers.
+         *
+         * @param date date to capture
+         */
         void recordClose(LocalDate date) {
             if (earliestClose == null || date.isBefore(earliestClose)) {
                 earliestClose = date;
@@ -240,23 +337,38 @@ public class InternshipReportController extends Controller {
             }
         }
 
+        /**
+         * @return earliest captured opening date or {@code null}
+         */
         LocalDate earliestOpen() {
             return earliestOpen;
         }
 
+        /**
+         * @return latest captured opening date or {@code null}
+         */
         LocalDate latestOpen() {
             return latestOpen;
         }
 
+        /**
+         * @return earliest captured closing date or {@code null}
+         */
         LocalDate earliestClose() {
             return earliestClose;
         }
 
+        /**
+         * @return latest captured closing date or {@code null}
+         */
         LocalDate latestClose() {
             return latestClose;
         }
     }
 
+    /**
+     * Immutable data transfer object summarising report metrics for display.
+     */
     private record ReportSummary(
             String staffId,
             StaffReviewFilters filters,
@@ -272,16 +384,32 @@ public class InternshipReportController extends Controller {
             DateStats dateStats
     ) { }
 
+    /**
+     * Display helper responsible for presenting the generated internship report.
+     */
     private class InternshipReportDisplay extends common.Display {
+        /**
+         * Creates a display facade bound to the owning controller.
+         *
+         * @param owner controller coordinating the display
+         */
         InternshipReportDisplay(Controller owner) {
             super(owner);
         }
 
+        /**
+         * Not used because the report prints immediately without a menu.
+         */
         @Override
         public void print_menu() {
             // Not used because the report is generated in one pass.
         }
 
+        /**
+         * Renders the report breakdown to the console.
+         *
+         * @param summary aggregated report data
+         */
         void showReport(ReportSummary summary) {
             System.out.println();
             System.out.println("=== Internship Report ===");
@@ -301,12 +429,20 @@ public class InternshipReportController extends Controller {
             printDateStats(summary.dateStats());
         }
 
+        /**
+         * Waits for the user to acknowledge the report before returning.
+         */
         void waitForEnter() {
             System.out.println();
             System.out.print("Press Enter to return to the staff menu...");
             scanner.nextLine();
         }
 
+        /**
+         * Prints a summary of the filters that produced the report.
+         *
+         * @param filters filters applied to the dataset
+         */
         private void printFilterSummary(StaffReviewFilters filters) {
             System.out.println();
             System.out.println("Applied filters:");
@@ -320,6 +456,12 @@ public class InternshipReportController extends Controller {
             System.out.println(" - Closing date range: " + describeDateRange(filters.closeDateRange()));
         }
 
+        /**
+         * Formats a collection for display, returning "Any" when empty.
+         *
+         * @param values values to describe
+         * @return human-readable description
+         */
         private String describeCollection(Set<String> values) {
             if (values.isEmpty()) {
                 return "Any";
@@ -327,6 +469,12 @@ public class InternshipReportController extends Controller {
             return String.join(", ", values);
         }
 
+        /**
+         * Formats a date range for display, returning "Any" when not constrained.
+         *
+         * @param range range to describe
+         * @return textual representation of the range
+         */
         private String describeDateRange(StaffReviewFilters.DateRange range) {
             if (range == null) {
                 return "Any";
@@ -336,6 +484,12 @@ public class InternshipReportController extends Controller {
             return start + " to " + end;
         }
 
+        /**
+         * Prints the contents of a counter map using the provided label.
+         *
+         * @param label  heading for the section
+         * @param counts metrics to display
+         */
         private void printCounts(String label, Map<String, Long> counts) {
             System.out.println(label + " breakdown:");
             if (counts.isEmpty()) {
@@ -349,6 +503,11 @@ public class InternshipReportController extends Controller {
             System.out.println();
         }
 
+        /**
+         * Prints the aggregated date ranges captured in the summary.
+         *
+         * @param stats date statistics to describe
+         */
         private void printDateStats(DateStats stats) {
             System.out.println("Date range overview:");
             if (stats.earliestOpen() == null && stats.earliestClose() == null) {
@@ -365,6 +524,13 @@ public class InternshipReportController extends Controller {
             System.out.println();
         }
 
+        /**
+         * Formats the supplied range endpoints into a textual interval.
+         *
+         * @param start start date
+         * @param end   end date
+         * @return human-readable range string
+         */
         private String formatRange(LocalDate start, LocalDate end) {
             String startText = start == null ? "-" : start.toString();
             String endText = end == null ? "-" : end.toString();

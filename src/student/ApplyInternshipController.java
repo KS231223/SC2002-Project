@@ -6,9 +6,12 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+/**
+ * Allows students to apply for available internship opportunities.
+ */
 public class ApplyInternshipController extends StudentController {
 
-    private ApplyInternshipDisplay display;
+    private final ApplyInternshipDisplay display;
     private static final String INTERNSHIP_FILE =
         PathResolver.resource("internship_opportunities.csv");
     private static final String APPLICATION_FILE =
@@ -16,12 +19,25 @@ public class ApplyInternshipController extends StudentController {
     private static final String STUDENT_FILE =
         PathResolver.resource("student.csv");
 
+    /**
+     * Creates a controller enabling applications to internships.
+     *
+     * @param router    router managing navigation
+     * @param scanner   shared console input
+     * @param studentID identifier for the logged-in student
+     * @throws InvalidStudentIDException when {@code studentID} is invalid
+     */
+    @SuppressWarnings("LeakingThisInConstructor")
     public ApplyInternshipController(Router router, Scanner scanner, String studentID) throws InvalidStudentIDException {
         super(router, scanner, studentID);
         this.display = new ApplyInternshipDisplay(this);
         router.push(this);
     }
 
+    /**
+     * Presents available internships, validates selections, and persists a new
+     * application when eligibility and deadlines permit.
+     */
     @Override
     public void initialize() {
         List<Entity> internships = DatabaseManager.getDatabase(INTERNSHIP_FILE, new ArrayList<>(), "Internship");
@@ -88,18 +104,31 @@ public class ApplyInternshipController extends StudentController {
 
     }
 
+    /**
+     * Helper used to verify that a student meets the internship level
+     * requirement.
+     */
     private static class YearChecker {
-        // Returns true if the student is eligible for the internship
+        /**
+         * Returns {@code true} when the student's year permits the selected
+         * internship level.
+         */
         static boolean checkYear(String studentsAge, String internshipLevel) {
-            if ((studentsAge.equals("1") || studentsAge.equals("2")) && !internshipLevel.equalsIgnoreCase("Basic")) {
-                return false;
-            }
-            return true;
+            return !(("1".equals(studentsAge) || "2".equals(studentsAge))
+                    && !"Basic".equalsIgnoreCase(internshipLevel));
         }
     }
 }
 
+/**
+ * Display helper for the internship application flow.
+ */
 class ApplyInternshipDisplay extends Display {
+    /**
+     * Creates a display bound to the application controller.
+     *
+     * @param owner controller coordinating the display
+     */
     public ApplyInternshipDisplay(Controller owner) {
         super(owner);
     }
@@ -107,6 +136,11 @@ class ApplyInternshipDisplay extends Display {
     @Override
     public void print_menu() {}
 
+    /**
+     * Prints the internships available for application.
+     *
+     * @param internships internships pulled from storage
+     */
     public void print_list(List<Entity> internships) {
         System.out.println("=== Available Internships ===");
         for (Entity e : internships) {
@@ -114,6 +148,11 @@ class ApplyInternshipDisplay extends Display {
         }
     }
 
+    /**
+     * Prompts the student for the internship identifier to apply to.
+     *
+     * @return provided internship identifier
+     */
     public String ask_internship_id() {
         System.out.print("Enter Internship ID to apply: ");
         return get_user_input();

@@ -4,23 +4,44 @@ import common.*;
 import exceptions.*;
 import java.util.Scanner;
 
+/**
+ * Entry point for company representatives to manage internships and related
+ * applications.
+ */
 public class CRHomePageController extends CRController {
 
-    private Display crDisplay;
+    private final Display crDisplay;
 
     // Constructor
+    /**
+     * Builds the company representative home page controller and places it on
+     * the router stack.
+     *
+     * @param router router coordinating navigation
+     * @param scanner shared console input
+     * @param crID identifier of the logged-in company representative
+     * @throws InvalidCompanyRepIDException when {@code crID} cannot be resolved
+     */
+    @SuppressWarnings("LeakingThisInConstructor")
     public CRHomePageController(Router router, Scanner scanner, String crID) throws InvalidCompanyRepIDException {
         super(router, scanner, crID);
         this.crDisplay = new CRHomeDisplay(this);
         router.replace(this); // swap to this controller
     }
 
+    /**
+     * Announces successful login and launches the main menu loop.
+     */
     @Override
     public void initialize() {
         System.out.println("Company Representative Home Page loaded successfully for " + name + "!");
         this.handleMenu();
     }
 
+    /**
+     * Processes menu interactions until the representative logs out.
+     */
+    @SuppressWarnings("ResultOfObjectAllocationIgnored")
     private void handleMenu() {
         while (true) {
             printActiveFiltersHeader();
@@ -28,56 +49,56 @@ public class CRHomePageController extends CRController {
             String choice = crDisplay.get_user_input();
             try {
                 switch (choice) {
-                    case "1":
-                        new ListMyInternshipsController(router, scanner, userID);
-                        break;
-                    case "2":
-                        new CreateInternshipController(router, scanner, userID);
-                        break;
-                    case "3":
-                        new ToggleVisibilityController(router, scanner, userID);
-                        break;
-                    case "4":
-                        new ViewApplicationsController(router, scanner, userID);
-                        break;
-                    case "5":
-                        new ReviewApplicationController(router, scanner, userID);
-                        break;
-                    case "6":
-                        new FilterInternshipsController(router, scanner, userID);
-                        break;
-                    case "7":
+                    case "1" -> new ListMyInternshipsController(router, scanner, userID);
+                    case "2" -> new CreateInternshipController(router, scanner, userID);
+                    case "3" -> new ToggleVisibilityController(router, scanner, userID);
+                    case "4" -> new ViewApplicationsController(router, scanner, userID);
+                    case "5" -> new ReviewApplicationController(router, scanner, userID);
+                    case "6" -> new FilterInternshipsController(router, scanner, userID);
+                    case "7" -> {
                         CRFilterService.clearFilters(userID);
                         System.out.println("Internship filters cleared.");
-                        break;
-                    case "8":
-                        new PasswordChanger(router, scanner, userID); // run change password
-                        break;
-                    case "9":
+                    }
+                    case "8" -> new PasswordChanger(router, scanner, userID); // run change password
+                    case "9" -> {
                         System.out.println("Logging out...");
                         router.pop();
                         return;
-                    default:
-                        System.out.println("Invalid option. Try again.");
+                    }
+                    default -> System.out.println("Invalid option. Try again.");
                 }
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+            } catch (InvalidCompanyRepIDException ex) {
+                System.out.println("Unable to open the requested page: " + ex.getMessage());
             }
         }
     }
 
+    /**
+     * Prints the current filter summary for quick reference.
+     */
     private void printActiveFiltersHeader() {
         System.out.println("Active filters: " + CRFilterService.summarize(userID));
     }
 
     // Private inner display class for CR home page
+    /**
+     * Display wrapper that renders the company representative menu.
+     */
     private static class CRHomeDisplay extends Display {
 
+        /**
+         * Creates a display instance tied to the home page controller.
+         *
+         * @param owner owning controller
+         */
         public CRHomeDisplay(Controller owner) {
             super(owner);
         }
 
-        @Override
+    /**
+     * Prints the menu options available to company representatives.
+     */
+    @Override
         public void print_menu() {
             System.out.println("=== Company Representative Menu ===");
             System.out.println("1. List my internships");

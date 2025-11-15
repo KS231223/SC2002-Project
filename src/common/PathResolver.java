@@ -13,6 +13,12 @@ public final class PathResolver {
         // Utility class
     }
 
+    /**
+     * Resolves a path inside the {@code resources} directory regardless of CWD.
+     *
+     * @param segments path segments under {@code resources}
+     * @return absolute path to the requested resource
+     */
     public static String resource(String... segments) {
         Path base = PROJECT_ROOT.resolve("resources");
         for (String segment : segments) {
@@ -21,6 +27,9 @@ public final class PathResolver {
         return base.toString();
     }
 
+    /**
+     * Attempts to find the project root by walking the filesystem.
+     */
     private static Path locateProjectRoot() {
         Path cwd = Paths.get("").toAbsolutePath();
         Path candidate = findWithProjectStructure(cwd);

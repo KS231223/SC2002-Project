@@ -4,18 +4,34 @@ import common.*;
 import exceptions.*;
 import java.util.*;
 
+/**
+ * Lists all internship applications submitted by the current student.
+ */
 public class ViewApplicationsController extends StudentController {
 
-    private ViewApplicationsDisplay display;
+    private final ViewApplicationsDisplay display;
     private static final String APPLICATION_FILE =
         PathResolver.resource("internship_applications.csv");
 
+    /**
+     * Creates a controller to display a student's internship applications.
+     *
+     * @param router    router managing navigation
+     * @param scanner   shared console input
+     * @param studentID identifier for the logged-in student
+     * @throws InvalidStudentIDException when {@code studentID} is invalid
+     */
+    @SuppressWarnings("LeakingThisInConstructor")
     public ViewApplicationsController(Router router, Scanner scanner, String studentID) throws InvalidStudentIDException {
         super(router, scanner, studentID);
         this.display = new ViewApplicationsDisplay(this);
         router.push(this);
     }
 
+    /**
+     * Retrieves all applications for the current student and waits for user
+     * acknowledgment before returning to the previous menu.
+     */
     @Override
     public void initialize() {
         List<Entity> applications = DatabaseManager.getDatabase(APPLICATION_FILE, new ArrayList<>(), "Application");
@@ -34,8 +50,16 @@ public class ViewApplicationsController extends StudentController {
     }
 }
 
+/**
+ * Display helper for presenting the student's applications.
+ */
 class ViewApplicationsDisplay extends Display {
 
+    /**
+     * Creates a display bound to the applications controller.
+     *
+     * @param owner controller managing this display
+     */
     public ViewApplicationsDisplay(Controller owner) {
         super(owner);
     }
@@ -43,6 +67,11 @@ class ViewApplicationsDisplay extends Display {
     @Override
     public void print_menu() {}
 
+    /**
+     * Prints the student's application list.
+     *
+     * @param apps applications belonging to the student
+     */
     public void print_list(List<Entity> apps) {
         System.out.println("=== My Applications ===");
         if (apps.isEmpty()) {

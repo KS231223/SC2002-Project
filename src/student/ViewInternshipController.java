@@ -4,18 +4,35 @@ import common.*;
 import exceptions.*;
 import java.util.*;
 
+/**
+ * Presents internship listings filtered according to the student's saved
+ * preferences.
+ */
 public class ViewInternshipController extends StudentController {
 
-    private ViewInternshipDisplay display;
+    private final ViewInternshipDisplay display;
     private static final String INTERNSHIP_FILE =
         PathResolver.resource("internship_opportunities.csv");
 
+    /**
+     * Creates a controller to display internships respecting student filters.
+     *
+     * @param router    router managing navigation
+     * @param scanner   shared console input
+     * @param studentID identifier for the logged-in student
+     * @throws InvalidStudentIDException when {@code studentID} cannot be resolved
+     */
+    @SuppressWarnings("LeakingThisInConstructor")
     public ViewInternshipController(Router router, Scanner scanner, String studentID) throws InvalidStudentIDException {
         super(router, scanner, studentID);
         this.display = new ViewInternshipDisplay(this);
         router.push(this);
     }
 
+    /**
+     * Loads internships, applies the student's filters, and displays matching
+     * opportunities.
+     */
     @Override
     public void initialize() {
         StudentEntity student = StudentFilterService.loadStudent(studentID);
@@ -59,17 +76,33 @@ public class ViewInternshipController extends StudentController {
     }
 }
 
+/**
+ * Display helper for presenting internships and filter summaries.
+ */
 class ViewInternshipDisplay extends Display {
 
+    /**
+     * Creates a display bound to the internship listing controller.
+     *
+     * @param owner controller managing this display
+     */
     public ViewInternshipDisplay(Controller owner) {
         super(owner);
     }
 
+    /**
+     * Prints the heading for the internships list.
+     */
     @Override
     public void print_menu() {
         System.out.println("=== Available Internships ===");
     }
 
+    /**
+     * Prints the menu along with applied filter information.
+     *
+     * @param filters filters currently affecting the listings
+     */
     public void print_menu(StudentFilterService.StudentFilters filters) {
         print_menu();
         if (filters.hasActiveFilters()) {
@@ -84,6 +117,11 @@ class ViewInternshipDisplay extends Display {
         }
     }
 
+    /**
+     * Renders the details of each internship in the provided list.
+     *
+     * @param internships internships to display
+     */
     public void print_list(List<InternshipEntity> internships) {
         for (InternshipEntity internship : internships) {
             System.out.println("----------------------------------------");
@@ -100,10 +138,16 @@ class ViewInternshipDisplay extends Display {
         System.out.println("----------------------------------------");
     }
 
+    /**
+     * Returns a safe string, substituting a default when the value is blank.
+     */
     private String safe(String value) {
         return (value == null || value.isBlank()) ? "Not specified" : value;
     }
 
+    /**
+     * Formats filter values for display.
+     */
     private String format(String value) {
         if (value == null || value.equalsIgnoreCase(StudentEntity.NO_FILTER_VALUE)) {
             return "None";

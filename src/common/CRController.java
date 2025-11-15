@@ -6,22 +6,31 @@ import java.io.IOException;
 import java.util.Scanner;
 
 
+/**
+ * Shared base for company representative flows that preloads CR profile data.
+ */
 public abstract class CRController extends UserController {
 
-    protected String companyRepID;
+    protected final String companyRepID;
     protected String name;
     protected String companyName;
     protected String department;
     protected String position;
     protected String email;
 
-    // Constructor that loads company rep details based on RepID
+    /**
+     * Loads company representative metadata for the active session.
+     *
+     * @param router navigation coordinator
+     * @param scanner shared console reader
+     * @param companyRepID identifier of the logged-in company representative
+     * @throws InvalidCompanyRepIDException when the identifier cannot be found or the data file is missing
+     */
     public CRController(Router router,Scanner scanner, String companyRepID) throws InvalidCompanyRepIDException {
         super(router, scanner,companyRepID);
         this.companyRepID = companyRepID;
 
-        // Load company rep details from CSV
-    File file = new File(PathResolver.resource("cr.csv"));
+        File file = new File(PathResolver.resource("cr.csv"));
         boolean found = false;
 
         if (!file.exists()) {
@@ -31,10 +40,14 @@ public abstract class CRController extends UserController {
         try (Scanner reader = new Scanner(file)) {
             while (reader.hasNextLine()) {
                 String line = reader.nextLine().trim();
-                if (line.isEmpty()) continue;
+                if (line.isEmpty()) {
+                    continue;
+                }
 
                 String[] parts = line.split(","); // CompanyRepID,Name,CompanyName,Department,Position,Email
-                if (parts.length < 6) continue;
+                if (parts.length < 6) {
+                    continue;
+                }
 
                 if (parts[0].equals(companyRepID)) {
                     this.name = parts[1];
@@ -55,11 +68,12 @@ public abstract class CRController extends UserController {
         }
     }
 
-    // Abstract initialize method from Controller
     @Override
     public abstract void initialize();
 
-    // Optional: helper method to display company rep info
+    /**
+     * Prints the preloaded company representative details for debugging or diagnostics.
+     */
     public void printCRInfo() {
         System.out.printf("ID: %s\nName: %s\nCompany: %s\nDepartment: %s\nPosition: %s\nEmail: %s\n",
                 companyRepID, name, companyName, department, position, email);

@@ -1,17 +1,22 @@
 package common;
 
 import java.util.Stack;
-import exceptions.*;
 
 //PUSH IS FOR ADDING A NEW SERVICE OR A PAGE. USED IF NEED TO BACKTRACK
 //REPLACE IS FOR SWAPPING THE CURRENT ROLE OF THE APP TO A NEW ROLE LIKE FROM GUEST TO STAFF
 //POP IS FOR EXITING THE CURRENT SERVICE OR PAGE AND BACKTRACKING.
 
+/**
+ * Manages a stack of controllers representing the current navigation history.
+ */
 public class Router {
-    private Stack<Controller> controllerStack;
+    private final Stack<Controller> controllerStack;
 
+    /**
+     * Creates an empty router stack.
+     */
     public Router() {
-        controllerStack = new Stack<Controller>();
+        controllerStack = new Stack<>();
     }
 
     /**
@@ -26,6 +31,9 @@ public class Router {
         this.push(controller);
 
     }
+    /**
+     * Activates a new controller by pushing it on the stack and initializing it.
+     */
     public void push(Controller controller) {
         if (controller == null) {
             throw new IllegalArgumentException("Controller cannot be null");
@@ -66,6 +74,9 @@ public class Router {
     /**
      * Peek the current (top) controller without modifying the stack.
      */
+    /**
+     * Peek the current (top) controller without modifying the stack.
+     */
     public Controller peek() {
         if (controllerStack.isEmpty()) {
             return null;
@@ -76,10 +87,16 @@ public class Router {
     /**
      * Check if the stack is empty.
      */
+    /**
+     * Check if the stack is empty.
+     */
     public boolean isEmpty() {
         return controllerStack.isEmpty();
     }
 
+    /**
+     * Get the current stack size.
+     */
     /**
      * Get the current stack size.
      */

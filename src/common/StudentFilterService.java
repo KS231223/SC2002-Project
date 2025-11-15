@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+/**
+ * Provides utility methods for loading students and applying student-side internship filters.
+ */
 public final class StudentFilterService {
 
     private static final String STUDENT_FILE = PathResolver.resource("student.csv");
@@ -20,6 +23,9 @@ public final class StudentFilterService {
     private StudentFilterService() {
     }
 
+    /**
+     * Loads a student record by identifier.
+     */
     public static StudentEntity loadStudent(String studentId) {
         Entity entity = DatabaseManager.getEntryById(STUDENT_FILE, studentId, "Student");
         if (entity == null) {
@@ -28,6 +34,9 @@ public final class StudentFilterService {
         return (StudentEntity) entity;
     }
 
+    /**
+     * Persists the supplied student entity back to storage.
+     */
     public static void saveStudent(StudentEntity student) {
         if (student == null) {
             return;
@@ -35,6 +44,9 @@ public final class StudentFilterService {
         DatabaseManager.updateEntry(STUDENT_FILE, student.getStudentID(), student, "Student");
     }
 
+    /**
+     * Resets the filter fields on the provided student entity without persisting.
+     */
     public static void resetFilters(StudentEntity student) {
         if (student == null) {
             return;
@@ -46,6 +58,9 @@ public final class StudentFilterService {
         student.set(StudentEntity.StudentField.FilterClosingSort, StudentEntity.NO_FILTER_VALUE);
     }
 
+    /**
+     * Clears persisted filters for the student identified by {@code studentId}.
+     */
     public static void clearFilters(String studentId) {
         StudentEntity student = loadStudent(studentId);
         if (student == null) {
@@ -55,6 +70,9 @@ public final class StudentFilterService {
         saveStudent(student);
     }
 
+    /**
+     * Extracts normalized filter values from the supplied student entity.
+     */
     public static StudentFilters extractFilters(StudentEntity student) {
         if (student == null) {
             return new StudentFilters(StudentEntity.NO_FILTER_VALUE, StudentEntity.NO_FILTER_VALUE,
@@ -69,6 +87,9 @@ public final class StudentFilterService {
     );
     }
 
+    /**
+     * Determines whether an internship passes the supplied filters.
+     */
     public static boolean matchesFilters(InternshipEntity internship, StudentFilters filters) {
         if (internship == null || filters == null) {
             return false;
@@ -86,12 +107,18 @@ public final class StudentFilterService {
         if (filters.hasStatus() && !equalsIgnoreCase(internship.get(InternshipEntity.InternshipField.Status), filters.status())) {
             return false;
         }
-        if (filters.hasMajor() && !equalsIgnoreCase(internship.get(InternshipEntity.InternshipField.PreferredMajor), filters.major())) {
-            return false;
+        if (!filters.hasMajor()) {
+            return true;
         }
-        return true;
+        return equalsIgnoreCase(
+            internship.get(InternshipEntity.InternshipField.PreferredMajor),
+            filters.major()
+        );
     }
 
+    /**
+     * Sorts internships using the requested closing-date preference.
+     */
     public static void sortInternships(List<InternshipEntity> internships, StudentFilters filters) {
         if (internships == null || filters == null) {
             return;
@@ -116,6 +143,9 @@ public final class StudentFilterService {
         internships.sort(comparator);
     }
 
+    /**
+     * Lists company names extracted from internships, in alphabetical order.
+     */
     public static List<String> listCompanies() {
         List<Entity> internships = DatabaseManager.getDatabase(INTERNSHIP_FILE, new ArrayList<>(), "Internship");
         Set<String> companies = new LinkedHashSet<>();
@@ -169,6 +199,9 @@ public final class StudentFilterService {
         }
     }
 
+    /**
+     * Immutable bundle of normalized student filter selections.
+     */
     public record StudentFilters(String level,
                                  String company,
                                  String status,

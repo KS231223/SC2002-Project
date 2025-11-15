@@ -38,6 +38,12 @@ public final class CRFilterService {
     private CRFilterService() {
     }
 
+    /**
+     * Retrieves the active filters for the given company representative.
+     *
+     * @param crId company representative identifier
+     * @return stored filters or an empty filter set when none are stored
+     */
     public static CRFilters getFilters(String crId) {
         if (crId == null) {
             return CRFilters.empty();
@@ -45,6 +51,15 @@ public final class CRFilterService {
         return FILTERS.getOrDefault(crId, CRFilters.empty());
     }
 
+    /**
+     * Persists normalized filter values for a company representative.
+     *
+     * @param crId company representative identifier
+     * @param status desired status filter
+     * @param visibility desired visibility filter
+     * @param level desired level filter
+     * @param major desired major filter
+     */
     public static void updateFilters(String crId, String status, String visibility, String level, String major) {
         if (crId == null) {
             return;
@@ -57,6 +72,11 @@ public final class CRFilterService {
         }
     }
 
+    /**
+     * Removes any stored filters for the given company representative.
+     *
+     * @param crId company representative identifier
+     */
     public static void clearFilters(String crId) {
         if (crId == null) {
             return;
@@ -64,18 +84,30 @@ public final class CRFilterService {
         FILTERS.remove(crId);
     }
 
+    /**
+     * Normalizes a free-form status input into a canonical value.
+     */
     public static Optional<String> normalizeStatus(String input) {
         return normalizeWithCanonical(input, STATUS_CANONICAL);
     }
 
+    /**
+     * Normalizes visibility input to either {@code Visible} or {@code Hidden}.
+     */
     public static Optional<String> normalizeVisibility(String input) {
         return normalizeWithCanonical(input, VISIBILITY_CANONICAL);
     }
 
+    /**
+     * Normalizes internship level input.
+     */
     public static Optional<String> normalizeLevel(String input) {
         return normalizeWithCanonical(input, LEVEL_CANONICAL);
     }
 
+    /**
+     * Normalizes major strings, returning {@link #NO_FILTER_VALUE} when empty.
+     */
     public static String normalizeMajor(String input) {
         String cleaned = cleaned(input);
         if (cleaned.isEmpty() || cleaned.equalsIgnoreCase(NO_FILTER_VALUE)) {
@@ -84,6 +116,9 @@ public final class CRFilterService {
         return cleaned;
     }
 
+    /**
+     * Checks whether a given internship satisfies the supplied filters.
+     */
     public static boolean matchesInternship(InternshipEntity internship, CRFilters filters) {
         if (internship == null) {
             return false;
@@ -107,13 +142,18 @@ public final class CRFilterService {
             return false;
         }
 
-        if (filters.hasMajor() && !matchesMajor(internship.get(InternshipEntity.InternshipField.PreferredMajor), filters.major())) {
-            return false;
+        if (!filters.hasMajor()) {
+            return true;
         }
-
-        return true;
+        return matchesMajor(
+            internship.get(InternshipEntity.InternshipField.PreferredMajor),
+            filters.major()
+        );
     }
 
+    /**
+     * Determines whether the internship is owned by the supplied company.
+     */
     public static boolean belongsToCompany(InternshipEntity internship, String companyName) {
         if (internship == null || companyName == null) {
             return false;
@@ -121,18 +161,30 @@ public final class CRFilterService {
         return equalsIgnoreCase(internship.get(InternshipEntity.InternshipField.CompanyName), companyName);
     }
 
+    /**
+     * Generates a human-readable summary of the stored filters.
+     */
     public static String summarize(String crId) {
         return getFilters(crId).summary();
     }
 
+    /**
+     * Lists allowed status filter values.
+     */
     public static List<String> allowedStatuses() {
         return new ArrayList<>(STATUS_CANONICAL.values());
     }
 
+    /**
+     * Lists allowed visibility filter tokens.
+     */
     public static List<String> allowedVisibilityStates() {
         return List.of("ON", "OFF");
     }
 
+    /**
+     * Lists allowed internship level filter values.
+     */
     public static List<String> allowedLevels() {
         return new ArrayList<>(LEVEL_CANONICAL.values());
     }
@@ -200,6 +252,9 @@ public final class CRFilterService {
         return input == null ? "" : input.trim();
     }
 
+    /**
+     * Immutable bundle describing the active filters for a company representative.
+     */
     public record CRFilters(String status, String visibility, String level, String major) {
 
         public CRFilters(String status, String visibility, String level, String major) {

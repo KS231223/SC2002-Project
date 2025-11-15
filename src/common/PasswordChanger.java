@@ -1,14 +1,21 @@
 package common;
 
-import exceptions.*;
+import exceptions.InvalidUserIDException;
 import java.io.*;
 import java.util.*;
 
+/**
+ * Handles the change-password flow for any authenticated user.
+ */
+@SuppressWarnings("LeakingThisInConstructor")
 public class PasswordChanger extends Controller {
 
-    private  String username;
-    protected Display display; // protected, non-static
+    private final String username;
+    protected final Display display; // protected, non-static
 
+    /**
+     * Creates a password change controller and immediately schedules it with the router.
+     */
     public PasswordChanger(Router router,Scanner scanner, String username) {
         super(router,scanner);
         this.username = username;
@@ -27,7 +34,7 @@ public class PasswordChanger extends Controller {
         try {
             changePassword(newPassword);
             System.out.println("Password updated successfully for user: " + username);
-        } catch (Exception e) {
+        } catch (InvalidUserIDException e) {
             System.err.println("Error updating password: " + e.getMessage());
         }
         finally {
@@ -36,10 +43,13 @@ public class PasswordChanger extends Controller {
     }
 
     // Backend logic for changing password
-    private void changePassword(String newPassword) throws IOException, InvalidUserIDException {
+    /**
+     * Persists a new password for the current user in {@code users.csv}.
+     */
+    private void changePassword(String newPassword) throws InvalidUserIDException {
         File file = new File(PathResolver.resource("users.csv"));
         if (!file.exists()) {
-            throw new IOException("User database not found.");
+            throw new InvalidUserIDException("User database not found.");
         }
 
         List<String> lines = new ArrayList<>();
@@ -61,6 +71,8 @@ public class PasswordChanger extends Controller {
 
                 lines.add(String.join(",", parts));
             }
+        } catch (FileNotFoundException e) {
+            throw new InvalidUserIDException("User database not accessible: " + e.getMessage());
         }
 
         if (!found) {
@@ -71,10 +83,16 @@ public class PasswordChanger extends Controller {
             for (String line : lines) {
                 writer.println(line);
             }
+        } catch (IOException e) {
+            throw new InvalidUserIDException("Unable to persist password update: " + e.getMessage());
         }
     }
 
 }
+
+/**
+ * Console display supporting the change-password workflow.
+ */
 class ChangePasswordDisplay extends Display {
 
     ChangePasswordDisplay(Controller owner) {
@@ -86,6 +104,9 @@ class ChangePasswordDisplay extends Display {
         System.out.println("=== Change Password ===");
     }
 
+    /**
+     * Prompts the user for the replacement password.
+     */
     String getNewPassword() {
         System.out.print("Enter new password: ");
         return get_user_input();

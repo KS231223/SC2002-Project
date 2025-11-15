@@ -9,26 +9,48 @@ import java.util.Objects;
 import java.util.Scanner;
 import java.util.Set;
 
+/**
+ * Controller that drives the interactive staff home page, allowing users to
+ * review pending items and adjust the shared filter state used across review
+ * flows.
+ */
 public class StaffHomePageController extends StaffController {
 
     private final Display staffDisplay;
     private final StaffReviewFilters filters = new StaffReviewFilters();
 
+    /**
+     * Creates a controller for the staff home page.
+     *
+     * @param router  navigation helper used to swap controllers
+     * @param scanner shared input stream for console interactions
+     * @param staffID identifier of the logged-in staff member
+     * @throws InvalidStaffIDException if {@code staffID} cannot be resolved
+     */
     public StaffHomePageController(Router router, Scanner scanner, String staffID ) throws InvalidStaffIDException {
         super(router, scanner, staffID);
         this.staffDisplay = new StaffHomeDisplay(this);
     }
 
+    /**
+     * Replaces the current controller on the router stack with this instance.
+     */
     public void open() {
         router.replace(this);
     }
 
+    /**
+     * Displays a welcome message and starts the staff dashboard menu loop.
+     */
     @Override
     public void initialize() {
         System.out.println("Staff Home Page loaded successfully for " + name + "!");
         this.handleMenu();
     }
 
+    /**
+     * Handles the primary dashboard menu until the user logs out.
+     */
     private void handleMenu(){
         while (true) {
             staffDisplay.print_menu();
@@ -48,6 +70,10 @@ public class StaffHomePageController extends StaffController {
         }
     }
 
+    /**
+     * Allows the staff user to configure review filters used by downstream
+     * controllers.
+     */
     private void editFilters() {
         boolean editing = true;
         while (editing) {
@@ -77,11 +103,18 @@ public class StaffHomePageController extends StaffController {
         }
     }
 
+    /**
+     * Resets all review filters back to their default unconstrained state.
+     */
     private void clearFilters() {
         filters.reset();
         System.out.println("All staff review filters cleared.");
     }
 
+    /**
+     * Prints a textual summary of the currently active filters to standard
+     * output.
+     */
     void printFilterSummary() {
         System.out.println("Current filters:");
         System.out.println(" - Status: " + describeCollection(filters.statuses()));
@@ -94,6 +127,9 @@ public class StaffHomePageController extends StaffController {
         System.out.println(" - Closing date range: " + describeDateRange(filters.closeDateRange()));
     }
 
+    /**
+     * Prompts the user to adjust the status filter.
+     */
     private void setStatusFilter() {
         System.out.println();
         System.out.println("Enter statuses to include (Pending, Approved, Rejected, Filled).");
@@ -103,6 +139,9 @@ public class StaffHomePageController extends StaffController {
         System.out.println(filters.statuses().isEmpty() ? "Status filter cleared." : "Status filter updated.");
     }
 
+    /**
+     * Prompts the user to adjust the preferred major filter.
+     */
     private void setMajorFilter() {
         System.out.println();
         System.out.println("Enter preferred majors to include (e.g., CSC, EEE, MAE).");
@@ -112,6 +151,9 @@ public class StaffHomePageController extends StaffController {
         System.out.println(filters.majors().isEmpty() ? "Preferred major filter cleared." : "Preferred major filter updated.");
     }
 
+    /**
+     * Prompts the user to adjust the internship level filter.
+     */
     private void setLevelFilter() {
         System.out.println();
         System.out.println("Enter internship levels to include (Basic, Intermediate, Advanced).");
@@ -121,6 +163,9 @@ public class StaffHomePageController extends StaffController {
         System.out.println(filters.levels().isEmpty() ? "Internship level filter cleared." : "Internship level filter updated.");
     }
 
+    /**
+     * Prompts the user to adjust the company name filter.
+     */
     private void setCompanyFilter() {
         System.out.println();
         System.out.println("Enter company names to include. Separate multiple values with commas or leave blank to clear the filter.");
@@ -129,6 +174,9 @@ public class StaffHomePageController extends StaffController {
         System.out.println(filters.companies().isEmpty() ? "Company filter cleared." : "Company filter updated.");
     }
 
+    /**
+     * Prompts the user to adjust the placement status filter.
+     */
     private void setPlacementStatusFilter() {
         System.out.println();
         System.out.println("Select placement status filter:");
@@ -145,6 +193,9 @@ public class StaffHomePageController extends StaffController {
         }
     }
 
+    /**
+     * Prompts the user to set the minimum number of applications filter.
+     */
     private void setMinimumApplications() {
         System.out.println();
         System.out.println("Enter minimum application count (leave blank to clear):");
@@ -167,6 +218,9 @@ public class StaffHomePageController extends StaffController {
         }
     }
 
+    /**
+     * Prompts the user to configure opening or closing date range filters.
+     */
     private void setDateRangeFilters() {
         System.out.println();
         System.out.println("Date range filters:");
@@ -193,6 +247,13 @@ public class StaffHomePageController extends StaffController {
         }
     }
 
+    /**
+     * Requests a date range for the specified label, ensuring that the end date
+     * is not earlier than the start date.
+     *
+     * @param label label describing the range, e.g. {@code "opening"}
+     * @return a populated date range or {@code null} if the range should be cleared
+     */
     private StaffReviewFilters.DateRange requestDateRange(String label) {
         while (true) {
             LocalDate start = promptDate("Start " + label + " date (yyyy-MM-dd, blank for none): ");
@@ -209,6 +270,12 @@ public class StaffHomePageController extends StaffController {
         }
     }
 
+    /**
+     * Prompts the user for a date value and validates the format.
+     *
+     * @param prompt label to display before reading input
+     * @return parsed {@link LocalDate} or {@code null} if left blank
+     */
     private LocalDate promptDate(String prompt) {
         while (true) {
             System.out.print(prompt);
@@ -224,6 +291,12 @@ public class StaffHomePageController extends StaffController {
         }
     }
 
+    /**
+     * Normalizes user input and stores the tokens in the target filter set.
+     *
+     * @param target set to populate
+     * @param input  raw user input, potentially {@code null}
+     */
     private void updateSetFilter(Set<String> target, String input) {
         target.clear();
         if (input == null) {
@@ -242,6 +315,12 @@ public class StaffHomePageController extends StaffController {
         }
     }
 
+    /**
+     * Formats the provided collection summary for display.
+     *
+     * @param values collection to describe
+     * @return human-readable description
+     */
     private String describeCollection(Set<String> values) {
         if (values.isEmpty()) {
             return "Any";
@@ -249,6 +328,12 @@ public class StaffHomePageController extends StaffController {
         return String.join(", ", values);
     }
 
+    /**
+     * Formats the provided date range summary for display.
+     *
+     * @param range range to describe
+     * @return human-readable date range
+     */
     private String describeDateRange(StaffReviewFilters.DateRange range) {
         if (range == null) {
             return "Any";
@@ -258,6 +343,12 @@ public class StaffHomePageController extends StaffController {
         return start + " to " + end;
     }
 
+    /**
+     * Normalizes values captured from user input.
+     *
+     * @param value raw value
+     * @return uppercase trimmed value or an empty string when {@code null}
+     */
     private String normalize(String value) {
         return value == null ? "" : value.trim().toUpperCase(Locale.ROOT);
     }
@@ -268,15 +359,26 @@ public class StaffHomePageController extends StaffController {
     // Private inner display class for staff home page
 
 
+/**
+ * Display implementation for the staff dashboard.
+ */
 class StaffHomeDisplay extends Display {
 
     private final StaffHomePageController staffHome;
 
+    /**
+     * Creates a display wrapper for the staff home controller.
+     *
+     * @param owner owner controller driving the display
+     */
     public StaffHomeDisplay(Controller owner) {
         super(owner);
         this.staffHome = (StaffHomePageController) owner;
     }
 
+    /**
+     * Presents the staff dashboard menu including a summary of active filters.
+     */
     @Override
     public void print_menu() {
         System.out.println("Welcome! Displaying staff dashboard...");
@@ -288,9 +390,9 @@ class StaffHomeDisplay extends Display {
         System.out.println("3. Handle withdrawal requests");
         System.out.println("4. Update review filters");
         System.out.println("5. Clear review filters");
-    System.out.println("6. Generate internship report");
-    System.out.println("7. Change password");
-    System.out.println("8. Logout");
+        System.out.println("6. Generate internship report");
+        System.out.println("7. Change password");
+        System.out.println("8. Logout");
         System.out.print("Select an option: ");
     }
 }

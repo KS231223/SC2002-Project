@@ -3,6 +3,9 @@ package staff;
 import common.*;
 import java.util.*;
 
+/**
+ * Handles staff review of pending internship submissions.
+ */
 public class ReviewInternshipController extends Controller {
     private final ReviewInternshipDisplay display;
     private final StaffReviewFilters filters;
@@ -13,6 +16,14 @@ public class ReviewInternshipController extends Controller {
     private static final String APPLICATION_FILE =
         PathResolver.resource("internship_applications.csv");
 
+    /**
+     * Creates a controller responsible for internship submission review.
+     *
+     * @param router   router used to manage controller navigation
+     * @param scanner  shared input reader
+     * @param staffID  identifier of the reviewing staff member
+     * @param filters  shared filters to apply when listing submissions
+     */
     @SuppressWarnings("LeakingThisInConstructor")
     public ReviewInternshipController(Router router, Scanner scanner, String staffID, StaffReviewFilters filters) {
         super(router, scanner);
@@ -21,6 +32,10 @@ public class ReviewInternshipController extends Controller {
         router.push(this);
     }
 
+    /**
+     * Lists filtered pending internships, prompts the reviewer for a decision,
+     * and applies the corresponding database updates.
+     */
     @Override
     public void initialize() {
         List<Entity> pendingRaw = DatabaseManager.getDatabase(PENDING_INTERNSHIP_FILE, new ArrayList<>(), "Internship");
@@ -66,6 +81,11 @@ public class ReviewInternshipController extends Controller {
         router.pop();
     }
 
+    /**
+     * Builds aggregate application statistics used by the filters.
+     *
+     * @return statistics bundle keyed by internship identifier
+     */
     private StaffReviewFilters.ApplicationStats loadApplicationStats() {
         List<Entity> applications = DatabaseManager.getDatabase(APPLICATION_FILE, new ArrayList<>(), "Application");
         Map<String, Long> total = new HashMap<>();
@@ -83,20 +103,41 @@ public class ReviewInternshipController extends Controller {
     }
 }
 
+/**
+ * Display helper for the internship review workflow.
+ */
 class ReviewInternshipDisplay extends Display {
+    /**
+     * Creates a display helper for internship review interactions.
+     *
+     * @param owner controller managing the display
+     */
     public ReviewInternshipDisplay(Controller owner) { super(owner); }
 
+    /**
+     * Announces the internship review prompt to the reviewer.
+     */
     @Override
     public void print_menu() {
             System.out.println("Welcome! Choose Internship ID to Approve/Reject");
 
     }
 
+    /**
+     * Shows the selected internship details and requests a decision.
+     *
+     * @param e internship pending review
+     */
     public void print_entry(Entity e) {
         System.out.println("\nPending internship: " + e);
         System.out.print("Approve (A) / Reject (R): ");
     }
 
+    /**
+     * Prints the list of internships available for review and prompts for an ID.
+     *
+     * @param list collection of internships available for selection
+     */
     public void print_list(List<Entity> list) {
         list.forEach(System.out::println);
         System.out.print("Enter Internship ID to approve/reject: ");

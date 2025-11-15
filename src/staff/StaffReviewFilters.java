@@ -24,54 +24,117 @@ public final class StaffReviewFilters {
     private DateRange openDateRange;
     private DateRange closeDateRange;
 
+    /**
+     * Returns the mutable set of status filters.
+     *
+     * @return collection containing allowed statuses
+     */
     public Set<String> statuses() {
         return statuses;
     }
 
+    /**
+     * Returns the mutable set of preferred major filters.
+     *
+     * @return collection containing allowed majors
+     */
     public Set<String> majors() {
         return majors;
     }
 
+    /**
+     * Returns the mutable set of internship level filters.
+     *
+     * @return collection containing allowed levels
+     */
     public Set<String> levels() {
         return levels;
     }
 
+    /**
+     * Returns the mutable set of company name filters.
+     *
+     * @return collection containing allowed companies
+     */
     public Set<String> companies() {
         return companies;
     }
 
+    /**
+     * Retrieves the placement status constraint.
+     *
+     * @return selected placement constraint
+     */
     public PlacementStatus placementStatus() {
         return placementStatus;
     }
 
+    /**
+     * Updates the placement status constraint.
+     *
+     * @param placementStatus new placement filter value
+     */
     public void placementStatus(PlacementStatus placementStatus) {
         this.placementStatus = placementStatus;
     }
 
+    /**
+     * Returns the minimum application count constraint.
+     *
+     * @return minimum applications required or {@code null}
+     */
     public Integer minApplications() {
         return minApplications;
     }
 
+    /**
+     * Updates the minimum application count constraint.
+     *
+     * @param minApplications threshold to apply, {@code null} to clear
+     */
     public void minApplications(Integer minApplications) {
         this.minApplications = minApplications;
     }
 
+    /**
+     * Returns the opening date range constraint.
+     *
+     * @return date range or {@code null}
+     */
     public DateRange openDateRange() {
         return openDateRange;
     }
 
+    /**
+     * Updates the opening date range constraint.
+     *
+     * @param openDateRange range to apply, {@code null} to clear
+     */
     public void openDateRange(DateRange openDateRange) {
         this.openDateRange = openDateRange;
     }
 
+    /**
+     * Returns the closing date range constraint.
+     *
+     * @return date range or {@code null}
+     */
     public DateRange closeDateRange() {
         return closeDateRange;
     }
 
+    /**
+     * Updates the closing date range constraint.
+     *
+     * @param closeDateRange range to apply, {@code null} to clear
+     */
     public void closeDateRange(DateRange closeDateRange) {
         this.closeDateRange = closeDateRange;
     }
 
+    /**
+     * Resets all filters to their default unrestricted values.
+     */
     public void reset() {
         statuses.clear();
         majors.clear();
@@ -83,6 +146,12 @@ public final class StaffReviewFilters {
         closeDateRange = null;
     }
 
+    /**
+     * Determines whether a registration request satisfies the current filters.
+     *
+     * @param entity company representative registration under review
+     * @return {@code true} when the entity matches the filters
+     */
     @SuppressWarnings("RedundantIfStatement")
     public boolean matchesRegistration(CREntity entity) {
         if (entity == null) {
@@ -95,6 +164,14 @@ public final class StaffReviewFilters {
         return companyOk && majorOk && levelOk && closingDateOk;
     }
 
+    /**
+     * Determines whether an internship submission satisfies the current filters.
+     *
+     * @param entity        internship submission under review
+     * @param totalApps     total applications received for the internship
+     * @param acceptedApps  accepted applications for the internship
+     * @return {@code true} when the submission matches the filters
+     */
     @SuppressWarnings("RedundantIfStatement")
     public boolean matchesInternship(InternshipEntity entity, long totalApps, long acceptedApps) {
         if (entity == null) {
@@ -111,6 +188,15 @@ public final class StaffReviewFilters {
         return statusOk && majorOk && levelOk && companyOk && openDateOk && closeDateOk && placementOk && minOk;
     }
 
+    /**
+     * Determines whether a withdrawal request satisfies the current filters.
+     *
+     * @param application   withdrawal request under review
+     * @param internship    corresponding internship, may be {@code null}
+     * @param totalApps     total applications submitted for the internship
+     * @param acceptedApps  accepted applications for the internship
+     * @return {@code true} when the request matches the filters
+     */
     @SuppressWarnings("RedundantIfStatement")
     public boolean matchesWithdrawal(ApplicationEntity application,
                                      InternshipEntity internship,
@@ -210,8 +296,17 @@ public final class StaffReviewFilters {
         return value == null ? "" : value.trim().toUpperCase(Locale.ROOT);
     }
 
+    /**
+     * Immutable range representing optional start and end dates.
+     *
+     * @param start earliest acceptable date, {@code null} for open-ended
+     * @param end   latest acceptable date, {@code null} for open-ended
+     */
     public record DateRange(LocalDate start, LocalDate end) { }
 
+    /**
+     * Enumerates placement filter options available to staff reviewers.
+     */
     public enum PlacementStatus {
         ANY("Any"),
         FILLED("Filled"),
@@ -223,28 +318,60 @@ public final class StaffReviewFilters {
             this.label = label;
         }
 
+        /**
+         * Evaluates whether the provided flag satisfies the placement constraint.
+         *
+         * @param filled whether the internship is considered filled
+         * @return {@code true} if the constraint permits the provided value
+         */
         public boolean matches(boolean filled) {
             return this == ANY || (this == FILLED && filled) || (this == UNFILLED && !filled);
         }
 
+        /**
+         * Human-readable label for display.
+         *
+         * @return formatted label
+         */
         public String label() {
             return label;
         }
     }
 
+    /**
+     * Aggregates application counts for internships, supporting filter checks.
+     */
     public static final class ApplicationStats {
         private final Map<String, Long> totalCounts;
         private final Map<String, Long> acceptedCounts;
 
+        /**
+         * Creates a statistics bundle for internship applications.
+         *
+         * @param totalCounts    application count by internship identifier
+         * @param acceptedCounts accepted application count by internship identifier
+         */
         public ApplicationStats(Map<String, Long> totalCounts, Map<String, Long> acceptedCounts) {
             this.totalCounts = totalCounts;
             this.acceptedCounts = acceptedCounts;
         }
 
+        /**
+         * Retrieves the total application count for a specific internship.
+         *
+         * @param internshipId identifier of the internship
+         * @return total applications recorded for the internship
+         */
         public long totalFor(String internshipId) {
             return totalCounts.getOrDefault(internshipId, 0L);
         }
 
+        /**
+         * Retrieves the accepted application count for a specific internship.
+         *
+         * @param internshipId identifier of the internship
+         * @return accepted applications recorded for the internship
+         */
         public long acceptedFor(String internshipId) {
             return acceptedCounts.getOrDefault(internshipId, 0L);
         }

@@ -1,6 +1,9 @@
 package common;
 
 
+/**
+ * Coordinates state transitions for internship applications written to CSV storage.
+ */
 public class ApplicationHandler {
     private static final String APPLICATION_FILE = PathResolver.resource("internship_applications.csv");
     private static final String INTERNSHIP_FILE = PathResolver.resource("internship_opportunities.csv");
@@ -12,7 +15,11 @@ public class ApplicationHandler {
       Application => String appID, String studentID, String internshipID,
                              String status, String submissionDate
      */
-
+    /**
+     * Marks the specified application as withdrawn and frees any reserved slot.
+     *
+     * @param applicationId identifier of the application to withdraw
+     */
     public static void withdrawApplication(String applicationId){
         try {
             Entity applicationToWithdraw = DatabaseManager.getEntryById(APPLICATION_FILE, applicationId, "Application");
@@ -38,8 +45,13 @@ public class ApplicationHandler {
         } catch (Exception e) {
             System.err.println("ERROR IN WITHDRAWING APPLICATION");
         }
-
     }
+
+    /**
+     * Approves the specified application and decrements the available internship slots.
+     *
+     * @param applicationId identifier of the application to approve
+     */
     public static void approveApplication(String applicationId){
         try {
 
@@ -65,6 +77,12 @@ public class ApplicationHandler {
             System.err.println("ERROR IN APPROVING APPLICATION");
         }
     }
+
+    /**
+     * Records a student's acceptance of an approved application and stores the company on the student profile.
+     *
+     * @param applicationId identifier of the application to accept
+     */
     public static void acceptApplication(String applicationId){
         try {
             Entity applicationToAccept = DatabaseManager.getEntryById(APPLICATION_FILE, applicationId, "Application");
@@ -86,6 +104,13 @@ public class ApplicationHandler {
             System.err.println("ERROR IN ACCEPTING APPLICATION");
         }
     }
+    /**
+     * Computes the updated slot count for an internship.
+     *
+     * @param value original slot count
+     * @param numberToAdd delta to apply
+     * @return new slot count as a string
+     */
     private static String modifySlots(String value, int numberToAdd){
         int valueToChange = Integer.parseInt(value);
         valueToChange += numberToAdd;

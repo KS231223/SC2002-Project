@@ -1,31 +1,52 @@
 package common;
 
+/**
+ * Represents a user account entry containing credentials and role information.
+ */
 public class UserEntity extends Entity {
 
-    public enum UserField { Username, Password, Role }
+	/**
+	 * Column identifiers for user records.
+	 */
+	public enum UserField { Username, Password, Role }
 
-    public UserEntity(String csvLine) {
-        values = csvLine.split(",", -1);
-    }
+	/**
+	 * Builds a user entity from CSV data.
+	 */
+	public UserEntity(String csvLine) {
+		values = csvLine.split(",", -1);
+	}
 
-    public UserEntity(String username, String password, String role) {
-        values = new String[]{username, password, role};
-    }
+	/**
+	 * Builds a user entity from discrete values.
+	 */
+	public UserEntity(String username, String password, String role) {
+		values = new String[]{username, password, role};
+	}
 
-    public String get(UserField f) {
-        return values[f.ordinal()];
-    }
+	/**
+	 * Retrieves the value of the requested field.
+	 */
+	public String get(UserField f) {
+		return values[f.ordinal()];
+	}
 
-    public void set(UserField f, String v) {
-        values[f.ordinal()] = v;
-    }
+	/**
+	 * Updates the value of the requested field.
+	 */
+	public void set(UserField f, String v) {
+		values[f.ordinal()] = v;
+	}
 
-    public String toCSV() {
-        return super.toCSVFormat();
-    }
+	/**
+	 * Serializes the entity to CSV form.
+	 */
+	public String toCSV() {
+		return super.toCSVFormat();
+	}
 
-    @Override
-    public String toString() {
-        return toCSV();
-    }
+	@Override
+	public String toString() {
+		return toCSV();
+	}
 }

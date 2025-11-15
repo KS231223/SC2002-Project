@@ -5,17 +5,33 @@ import exceptions.InvalidStudentIDException;
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ * Provides an interface for students to configure internship listing filters.
+ */
 public class UpdateInternshipFiltersController extends StudentController {
 
     private final UpdateInternshipFiltersDisplay display;
     private StudentEntity studentEntity;
 
+    /**
+     * Creates a controller that guides students through filter adjustments.
+     *
+     * @param router    router managing navigation
+     * @param scanner   shared console input
+     * @param studentID identifier for the logged-in student
+     * @throws InvalidStudentIDException when {@code studentID} cannot be located
+     */
+    @SuppressWarnings("LeakingThisInConstructor")
     public UpdateInternshipFiltersController(Router router, Scanner scanner, String studentID) throws InvalidStudentIDException {
         super(router, scanner, studentID);
         this.display = new UpdateInternshipFiltersDisplay(this);
         router.push(this);
     }
 
+    /**
+     * Loads existing filter preferences, presents the interactive menu, and
+     * persists updates upon exit.
+     */
     @Override
     public void initialize() {
         studentEntity = StudentFilterService.loadStudent(studentID);
@@ -46,6 +62,9 @@ public class UpdateInternshipFiltersController extends StudentController {
         }
     }
 
+    /**
+     * Updates the preferred internship level filter based on user input.
+     */
     private void updateLevel() {
         display.printLevelOptions();
         String choice = display.get_user_input();
@@ -62,6 +81,9 @@ public class UpdateInternshipFiltersController extends StudentController {
         System.out.println("Level filter updated to: " + studentEntity.get(StudentEntity.StudentField.FilterLevel));
     }
 
+    /**
+     * Updates the preferred company filter based on user selection or input.
+     */
     private void updateCompany() {
         List<String> companies = StudentFilterService.listCompanies();
         display.printCompanyOptions(companies);
@@ -91,6 +113,9 @@ public class UpdateInternshipFiltersController extends StudentController {
         System.out.println("Company filter updated to: " + studentEntity.get(StudentEntity.StudentField.FilterCompany));
     }
 
+    /**
+     * Updates the status filter reflecting internship approval state.
+     */
     private void updateStatus() {
         display.printStatusOptions();
         String choice = display.get_user_input();
@@ -108,6 +133,9 @@ public class UpdateInternshipFiltersController extends StudentController {
         System.out.println("Status filter updated to: " + studentEntity.get(StudentEntity.StudentField.FilterStatus));
     }
 
+    /**
+     * Updates the preferred major filter stored on the student record.
+     */
     private void updateMajor() {
         display.promptForMajor();
         String input = display.get_user_input().trim();
@@ -119,6 +147,9 @@ public class UpdateInternshipFiltersController extends StudentController {
         System.out.println("Preferred major filter updated to: " + studentEntity.get(StudentEntity.StudentField.FilterMajor));
     }
 
+    /**
+     * Updates the closing date sort preference for internship listings.
+     */
     private void updateClosingSort() {
         display.printClosingOptions();
         String choice = display.get_user_input();
@@ -136,8 +167,16 @@ public class UpdateInternshipFiltersController extends StudentController {
     }
 }
 
+/**
+ * Display helper for presenting and editing student filter preferences.
+ */
 class UpdateInternshipFiltersDisplay extends Display {
 
+    /**
+     * Creates a display associated with the filter update controller.
+     *
+     * @param owner controller coordinating the display
+     */
     UpdateInternshipFiltersDisplay(Controller owner) {
         super(owner);
     }
@@ -147,6 +186,11 @@ class UpdateInternshipFiltersDisplay extends Display {
         // Menu rendering handled via printMenu(StudentEntity) to include filter context.
     }
 
+    /**
+     * Renders the filter overview and main selection menu.
+     *
+     * @param student student whose filters are being edited
+     */
     public void printMenu(StudentEntity student) {
         StudentFilterService.StudentFilters filters = StudentFilterService.extractFilters(student);
         System.out.println("=== Update Internship Filters ===");
@@ -167,6 +211,9 @@ class UpdateInternshipFiltersDisplay extends Display {
         System.out.print("Select an option: ");
     }
 
+    /**
+     * Presents internship level options.
+     */
     public void printLevelOptions() {
         System.out.println("Select level filter:");
         System.out.println("1. None");
@@ -176,6 +223,11 @@ class UpdateInternshipFiltersDisplay extends Display {
         System.out.print("Choice: ");
     }
 
+    /**
+     * Lists company choices and accepts user input.
+     *
+     * @param companies known companies from the dataset
+     */
     public void printCompanyOptions(List<String> companies) {
         System.out.println("Select company filter (enter number or type a company name):");
         System.out.println("0. None");
@@ -185,6 +237,9 @@ class UpdateInternshipFiltersDisplay extends Display {
         System.out.print("Choice: ");
     }
 
+    /**
+     * Presents internship status filter options.
+     */
     public void printStatusOptions() {
         System.out.println("Select internship status:");
         System.out.println("1. None");
@@ -195,10 +250,16 @@ class UpdateInternshipFiltersDisplay extends Display {
         System.out.print("Choice: ");
     }
 
+    /**
+     * Prompts for a preferred major value.
+     */
     public void promptForMajor() {
         System.out.print("Enter preferred major (leave blank for none): ");
     }
 
+    /**
+     * Presents closing date sort preferences.
+     */
     public void printClosingOptions() {
         System.out.println("Select closing date preference:");
         System.out.println("1. Alphabetical by title (default)");
@@ -207,6 +268,9 @@ class UpdateInternshipFiltersDisplay extends Display {
         System.out.print("Choice: ");
     }
 
+    /**
+     * Formats stored filter values for presentation.
+     */
     private String format(String value) {
         if (value == null || value.equalsIgnoreCase(StudentEntity.NO_FILTER_VALUE)) {
             return "None";
