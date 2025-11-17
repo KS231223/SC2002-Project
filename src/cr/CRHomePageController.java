@@ -13,13 +13,14 @@ public class CRHomePageController extends CRController {
     private final Display crDisplay;
 
     // Constructor
+
     /**
      * Builds the company representative home page controller and places it on
      * the router stack.
      *
-     * @param router router coordinating navigation
+     * @param router  router coordinating navigation
      * @param scanner shared console input
-     * @param crID identifier of the logged-in company representative
+     * @param crID    identifier of the logged-in company representative
      * @throws InvalidCompanyRepIDException when {@code crID} cannot be resolved
      */
     @SuppressWarnings("LeakingThisInConstructor")
@@ -84,7 +85,8 @@ public class CRHomePageController extends CRController {
     /**
      * Display wrapper that renders the company representative menu.
      */
-    private static class CRHomeDisplay extends Display {
+}
+class CRHomeDisplay extends Display {
 
         /**
          * Creates a display instance tied to the home page controller.
@@ -112,5 +114,5 @@ public class CRHomePageController extends CRController {
             System.out.println("9. Logout");
             System.out.print("Select an option: \n");
         }
-    }
 }
+
