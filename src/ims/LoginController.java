@@ -14,6 +14,7 @@ public class LoginController extends Controller {
     private final Display loginDisplay;
     private static final String USER_DB_PATH =
         PathResolver.resource("users.csv");
+    private ControllerFactory loginRegistry;
 
     /**
      * Creates a login controller bound to the shared router and input stream.
@@ -24,14 +25,18 @@ public class LoginController extends Controller {
     public LoginController(Router router, Scanner scanner, EntityStore entityStore) {
         super(router, scanner, entityStore);
         this.loginDisplay = new LoginDisplay(this);
+        router.push(this);
+//
     }
+    protected ControllerFactory createRegistry(String userID) {
+        return new LoginRegistry(router, scanner, entityStore, userID);
+    }
+
 
     /**
      * Pushes this controller onto the router to begin the login workflow.
      */
-    public void start() {
-        router.push(this);
-    }
+
 
     /**
      * Handles the interactive login flow and routes the authenticated user to their landing page.
@@ -53,21 +58,19 @@ public class LoginController extends Controller {
                 role = role.trim().toLowerCase();
 
                 try {
-                    switch (role) {
-                        case "staff" -> {
-                            new StaffHomePageController(router, scanner, entityStore, username).open();
-                        }
-                        case "student" -> Objects.requireNonNull(new StudentHomePageController(router, scanner, entityStore, username));
-                        case "cr" -> Objects.requireNonNull(new CRHomePageController(router, scanner, entityStore, username));
-                        default -> System.err.println("Unknown role: " + role);
-                    }
-                } catch (InvalidStaffIDException | InvalidStudentIDException | InvalidCompanyRepIDException e) {
-                    System.err.println("Error loading home page: " + e.getMessage());
+                    loginRegistry = createRegistry(username);
+                    // Set the user ID for the current session
+
+
+                    // Delegate controller creation to the registry
+                    loginRegistry.createController(role);
+
+                } catch (IllegalArgumentException e) {
+                    System.err.println("Unknown role: " + role);
                 }
             } else {
                 System.out.println("Login failed. Invalid username or password.");
             }
-
         } catch (Exception e) {
             System.err.println("Error during login: " + e.getMessage());
             destroy();

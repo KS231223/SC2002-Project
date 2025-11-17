@@ -66,7 +66,7 @@ public class Authentication extends Controller {
         return switch (chosen_route.trim()) {
             case "1" -> {
                 System.out.println("\nRouting to Login...\n");
-                new LoginController(router, scanner, entityStore).start();
+                new LoginController(router, scanner, entityStore);
                 yield true;
             }
             case "2" -> {
