@@ -21,9 +21,16 @@ public class LoginController extends Controller {
      * @param router  navigation stack shared across controllers
      * @param scanner scanner used to capture user credentials
      */
+    private final HomeControllerFactory homeFactory;
+
     public LoginController(Router router, Scanner scanner, EntityStore entityStore) {
+        this(router, scanner, entityStore, new DefaultHomeControllerFactory());
+    }
+
+    public LoginController(Router router, Scanner scanner, EntityStore entityStore, HomeControllerFactory homeFactory) {
         super(router, scanner, entityStore);
         this.loginDisplay = new LoginDisplay(this);
+        this.homeFactory = homeFactory;
     }
 
     /**
@@ -53,14 +60,7 @@ public class LoginController extends Controller {
                 role = role.trim().toLowerCase();
 
                 try {
-                    switch (role) {
-                        case "staff" -> {
-                            new StaffHomePageController(router, scanner, entityStore, username).open();
-                        }
-                        case "student" -> Objects.requireNonNull(new StudentHomePageController(router, scanner, entityStore, username));
-                        case "cr" -> Objects.requireNonNull(new CRHomePageController(router, scanner, entityStore, username));
-                        default -> System.err.println("Unknown role: " + role);
-                    }
+                    homeFactory.navigateToHome(role, router, scanner, entityStore, username);
                 } catch (InvalidStaffIDException | InvalidStudentIDException | InvalidCompanyRepIDException e) {
                     System.err.println("Error loading home page: " + e.getMessage());
                 }
@@ -109,35 +109,4 @@ public class LoginController extends Controller {
     }
 }
 
-/**
- * Console helper responsible for rendering login prompts and collecting credentials.
- */
-class LoginDisplay extends Display {
-    /**
-     * Creates the display helper tied to the owning login controller.
-     *
-     * @param owner controller that uses this display
-     */
-    public LoginDisplay(Controller owner) {
-        super(owner);
-    }
-
-    /** Prints the login menu header. */
-    @Override
-    public void print_menu() {
-        System.out.println("=== Login ===");
-    }
-
-    /**
-     * Collects a username and password pair from the console input.
-     *
-     * @return two-element array containing username and password
-     */
-    public String[] get_credentials() {
-        System.out.print("Username: ");
-        String username = get_user_input();
-        System.out.print("Password: ");
-        String password = get_user_input();
-        return new String[]{username, password};
-    }
-}
+// Login display moved to `ims.LoginDisplay`

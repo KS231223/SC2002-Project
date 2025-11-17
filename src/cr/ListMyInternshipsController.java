@@ -52,18 +52,4 @@ public class ListMyInternshipsController extends CRController {
     }
 }
 
-class ListMyInternshipsDisplay extends Display {
-    public ListMyInternshipsDisplay(Controller owner) {
-        super(owner);
-    }
-
-    public void print_list(List<? extends Entity> internships) {
-        System.out.println("=== Your Internships ===");
-        for (Entity e : internships) {
-            System.out.println(e.toString());
-        }
-    }
-
-    @Override
-    public void print_menu() {}
-}
+// List my internships display moved to `cr.ListMyInternshipsDisplay`

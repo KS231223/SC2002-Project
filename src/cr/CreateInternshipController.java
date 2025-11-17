@@ -96,30 +96,4 @@ public class CreateInternshipController extends CRController {
     }
 }
 
-/**
- * Display helper capturing input for internship creation.
- */
-class CreateInternshipDisplay extends Display {
-    /**
-     * Creates a display associated with the creation controller.
-     *
-     * @param owner owning controller
-     */
-    public CreateInternshipDisplay(Controller owner) {
-        super(owner);
-    }
-
-    /**
-     * Prompts the user using the supplied message and returns trimmed input.
-     *
-     * @param msg prompt message
-     * @return trimmed response from the console
-     */
-    public String ask(String msg) {
-        System.out.print(msg);
-        return get_user_input().trim();
-    }
-
-    @Override
-    public void print_menu() {}
-}
+// Create internship display moved to `cr.CreateInternshipDisplay`

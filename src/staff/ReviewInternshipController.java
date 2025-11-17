@@ -103,43 +103,4 @@ public class ReviewInternshipController extends Controller {
     }
 }
 
-/**
- * Display helper for the internship review workflow.
- */
-class ReviewInternshipDisplay extends Display {
-    /**
-     * Creates a display helper for internship review interactions.
-     *
-     * @param owner controller managing the display
-     */
-    public ReviewInternshipDisplay(Controller owner) { super(owner); }
-
-    /**
-     * Announces the internship review prompt to the reviewer.
-     */
-    @Override
-    public void print_menu() {
-            System.out.println("Welcome! Choose Internship ID to Approve/Reject");
-
-    }
-
-    /**
-     * Shows the selected internship details and requests a decision.
-     *
-     * @param e internship pending review
-     */
-    public void print_entry(Entity e) {
-        System.out.println("\nPending internship: " + e);
-        System.out.print("Approve (A) / Reject (R): ");
-    }
-
-    /**
-     * Prints the list of internships available for review and prompts for an ID.
-     *
-     * @param list collection of internships available for selection
-     */
-    public void print_list(List<Entity> list) {
-        list.forEach(System.out::println);
-        System.out.print("Enter Internship ID to approve/reject: ");
-    }
-}
+// Internship review display moved to `staff.ReviewInternshipDisplay`

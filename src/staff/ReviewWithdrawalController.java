@@ -140,42 +140,4 @@ public class ReviewWithdrawalController extends Controller {
     }
 }
 
-/**
- * Display helper for the withdrawal review workflow.
- */
-class ReviewWithdrawalDisplay extends Display {
-    /**
-     * Creates a display helper for withdrawal review interactions.
-     *
-     * @param owner controller managing this display
-     */
-    public ReviewWithdrawalDisplay(Controller owner) { super(owner); }
-
-    /**
-     * Announces the withdrawal review prompt to the reviewer.
-     */
-    @Override
-    public void print_menu() {
-        System.out.println("Welcome! Choose Application ID to Approve/Reject");
-    }
-
-    /**
-     * Shows the selected withdrawal details and prompts for approval.
-     *
-     * @param e withdrawal request pending review
-     */
-    public void print_entry(Entity e) {
-        System.out.println("\nPending withdrawal: " + e);
-        System.out.print("Approve (A) / Reject (R): ");
-    }
-
-    /**
-     * Prints the withdrawals available for review and prompts for a selection.
-     *
-     * @param list collection of withdrawals available for selection
-     */
-    public void print_list(List<Entity> list) {
-        list.forEach(System.out::println);
-        System.out.print("Enter withdrawal ID to approve/reject: ");
-    }
-}
+// Review withdrawal display moved to `staff.ReviewWithdrawalDisplay`

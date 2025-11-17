@@ -81,38 +81,7 @@ public class CRHomePageController extends CRController {
         System.out.println("Active filters: " + CRFilterService.summarize(userID));
     }
 
-    // Private inner display class for CR home page
-    /**
-     * Display wrapper that renders the company representative menu.
-     */
-}
-class CRHomeDisplay extends Display {
+    // CR home display moved to `cr.CRHomeDisplay`
 
-        /**
-         * Creates a display instance tied to the home page controller.
-         *
-         * @param owner owning controller
-         */
-        public CRHomeDisplay(Controller owner) {
-            super(owner);
-        }
-
-    /**
-     * Prints the menu options available to company representatives.
-     */
-    @Override
-        public void print_menu() {
-            System.out.println("=== Company Representative Menu ===");
-            System.out.println("1. List my internships");
-            System.out.println("2. Create internship");
-            System.out.println("3. Toggle internship visibility");
-            System.out.println("4. View applications for my internships");
-            System.out.println("5. Review internship application");
-            System.out.println("6. Update internship filters");
-            System.out.println("7. Clear internship filters");
-            System.out.println("8. Change password");
-            System.out.println("9. Logout");
-            System.out.print("Select an option: ");
-        }
 }
 

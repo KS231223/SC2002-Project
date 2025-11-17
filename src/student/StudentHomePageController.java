@@ -3,6 +3,8 @@ package student;
 import common.*;
 import exceptions.*;
 import java.util.Scanner;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * Entry point for the student dashboard, providing navigation to key actions
@@ -42,67 +44,54 @@ public class StudentHomePageController extends StudentController {
      */
     @SuppressWarnings({"ResultOfObjectAllocationIgnored", "TooBroadCatch"})
     private void handleMenu() {
+        Map<String, ControllerCreator> factory = buildFactory();
+
         while (true) {
             studentDisplay.print_menu();
             String choice = studentDisplay.get_user_input();
 
-            try {
-                switch (choice) {
-                    case "1" -> new ViewInternshipController(router, scanner, entityStore, studentID);
-                    case "2" -> new UpdateInternshipFiltersController(router, scanner, entityStore, studentID);
-                    case "3" -> handleClearFilters();
-                    case "4" -> new ApplyInternshipController(router, scanner, entityStore, studentID);
-                    case "5" -> new ViewApplicationsController(router, scanner, entityStore, studentID);
-                    case "6" -> new WithdrawalRequestController(router, scanner, entityStore, studentID);
-                    case "7" -> new AcceptOfferController(router, scanner, entityStore, studentID);
-                    case "8" -> new PasswordChanger(router, scanner, entityStore, userID); // run change password
-                    case "9" -> {
-                        System.out.println("Logging out...");
-                        router.pop();
-                        return; // exit the loop
-                    }
-                    default -> System.out.println("Invalid option. Try again.");
-                }
-            } catch (InvalidStudentIDException ex) {
-                System.out.println("An error occurred: " + ex.getMessage());
-            } catch (RuntimeException ex) {
-                System.out.println("An unexpected error occurred: " + ex.getMessage());
+            // Handle non-controller actions first
+            if ("3".equals(choice)) {
+                handleClearFilters();
+                continue;
             }
+
+            if ("9".equals(choice)) {
+                System.out.println("Logging out...");
+                router.pop();
+                return;
+            }
+
+            ControllerCreator creator = factory.get(choice);
+            if (creator != null) {
+                try {
+                    creator.create();
+                } catch (InvalidStudentIDException ex) {
+                    System.out.println("An error occurred: " + ex.getMessage());
+                } catch (RuntimeException ex) {
+                    System.out.println("An unexpected error occurred: " + ex.getMessage());
+                } catch (Exception ex) {
+                    System.out.println("An error occurred: " + ex.getMessage());
+                }
+                continue;
+            }
+
+            System.out.println("Invalid option. Try again.");
         }
     }
 
-    // Private inner display class for student home page
-    /**
-     * Display wrapper that renders the student dashboard menu.
-     */
-    private static class StudentHomeDisplay extends Display {
+    // Display is now provided by `StudentHomeDisplay` in its own file.
 
-        /**
-         * Creates a display instance bound to the student home controller.
-         *
-         * @param owner parent controller
-         */
-        public StudentHomeDisplay(Controller owner) {
-            super(owner);
-        }
-
-        /**
-         * Prints the student dashboard menu options.
-         */
-        @Override
-        public void print_menu() {
-            System.out.println("=== Student Menu ===");
-            System.out.println("1. View available internships");
-            System.out.println("2. Update internship filters");
-            System.out.println("3. Clear internship filters");
-            System.out.println("4. Apply for an internship");
-            System.out.println("5. View my applications");
-            System.out.println("6. Request withdrawal");
-            System.out.println("7. Accept internship offer");
-            System.out.println("8. Change password");
-            System.out.println("9. Logout");
-            System.out.print("Select an option: ");
-        }
+    private Map<String, ControllerCreator> buildFactory() {
+        Map<String, ControllerCreator> m = new HashMap<>();
+        m.put("1", () -> new ViewInternshipController(router, scanner, entityStore, studentID));
+        m.put("2", () -> new UpdateInternshipFiltersController(router, scanner, entityStore, studentID));
+        m.put("4", () -> new ApplyInternshipController(router, scanner, entityStore, studentID));
+        m.put("5", () -> new ViewApplicationsController(router, scanner, entityStore, studentID));
+        m.put("6", () -> new WithdrawalRequestController(router, scanner, entityStore, studentID));
+        m.put("7", () -> new AcceptOfferController(router, scanner, entityStore, studentID));
+        m.put("8", () -> new PasswordChanger(router, scanner, entityStore, userID));
+        return m;
     }
 
     /**

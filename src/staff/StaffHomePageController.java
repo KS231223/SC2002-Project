@@ -8,6 +8,8 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * Controller that drives the interactive staff home page, allowing users to
@@ -56,18 +58,38 @@ public class StaffHomePageController extends StaffController {
             staffDisplay.print_menu();
             String choice = staffDisplay.get_user_input();
 
+            Map<String, ControllerCreator> factory = buildFactory();
+            ControllerCreator creator = factory.get(choice);
+            if (creator != null) {
+                try {
+                    creator.create();
+                } catch (InvalidStaffIDException ex) {
+                    System.out.println("An error occurred: " + ex.getMessage());
+                } catch (RuntimeException ex) {
+                    System.out.println("An unexpected error occurred: " + ex.getMessage());
+                } catch (Exception ex) {
+                    System.out.println("An error occurred: " + ex.getMessage());
+                }
+                continue;
+            }
+
             switch (choice) {
-                case "1" -> Objects.requireNonNull(new ReviewRegistrationController(router, scanner, entityStore, staffID, filters));
-                case "2" -> Objects.requireNonNull(new ReviewInternshipController(router, scanner, entityStore, staffID, filters));
-                case "3" -> Objects.requireNonNull(new ReviewWithdrawalController(router, scanner, entityStore, staffID, filters));
                 case "4" -> editFilters();
                 case "5" -> clearFilters();
-                case "6" -> Objects.requireNonNull(new InternshipReportController(router, scanner, entityStore, staffID, filters));
-                case "7" -> Objects.requireNonNull(new PasswordChanger(router, scanner, entityStore, userID));
                 case "8" -> { System.out.println("Logging out..."); router.pop(); return; }
                 default -> System.out.println("Invalid option. Try again.");
             }
         }
+    }
+
+    private Map<String, ControllerCreator> buildFactory() {
+        Map<String, ControllerCreator> m = new HashMap<>();
+        m.put("1", () -> Objects.requireNonNull(new ReviewRegistrationController(router, scanner, entityStore, staffID, filters)));
+        m.put("2", () -> Objects.requireNonNull(new ReviewInternshipController(router, scanner, entityStore, staffID, filters)));
+        m.put("3", () -> Objects.requireNonNull(new ReviewWithdrawalController(router, scanner, entityStore, staffID, filters)));
+        m.put("6", () -> Objects.requireNonNull(new InternshipReportController(router, scanner, entityStore, staffID, filters)));
+        m.put("7", () -> Objects.requireNonNull(new PasswordChanger(router, scanner, entityStore, userID)));
+        return m;
     }
 
     /**
@@ -355,44 +377,4 @@ public class StaffHomePageController extends StaffController {
 
 }
 
-
-    // Private inner display class for staff home page
-
-
-/**
- * Display implementation for the staff dashboard.
- */
-class StaffHomeDisplay extends Display {
-
-    private final StaffHomePageController staffHome;
-
-    /**
-     * Creates a display wrapper for the staff home controller.
-     *
-     * @param owner owner controller driving the display
-     */
-    public StaffHomeDisplay(Controller owner) {
-        super(owner);
-        this.staffHome = (StaffHomePageController) owner;
-    }
-
-    /**
-     * Presents the staff dashboard menu including a summary of active filters.
-     */
-    @Override
-    public void print_menu() {
-        System.out.println("Welcome! Displaying staff dashboard...");
-        System.out.println("=== Staff Home Page ===");
-        System.out.println("=== Career Center Staff Menu ===");
-        staffHome.printFilterSummary();
-        System.out.println("1. Review company representative registrations");
-        System.out.println("2. Review internship submissions");
-        System.out.println("3. Handle withdrawal requests");
-        System.out.println("4. Update review filters");
-        System.out.println("5. Clear review filters");
-        System.out.println("6. Generate internship report");
-        System.out.println("7. Change password");
-        System.out.println("8. Logout");
-        System.out.print("Select an option: ");
-    }
-}
+// Staff home display moved to `staff.StaffHomeDisplay`
