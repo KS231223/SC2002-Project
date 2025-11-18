@@ -59,7 +59,7 @@ public class ViewInternshipController extends StudentController {
 
     private void handleBookmarking(List<InternshipEntity> internships) {
         while (true) {
-            System.out.println("\nEnter internship ID to bookmark (or 'done' to exit): ");
+            System.out.println("\nEnter internship ID to bookmark/unbookmark (or 'done' to exit): ");
             String input = display.get_user_input().trim();
             
             if (input.equalsIgnoreCase("done")) {
@@ -80,7 +80,6 @@ public class ViewInternshipController extends StudentController {
             }
 
             addBookmark(studentID, input);
-            System.out.println("Internship '" + selectedInternship.get(InternshipEntity.InternshipField.Title) + "' has been bookmarked!");
         }
     }
 
@@ -92,7 +91,9 @@ public class ViewInternshipController extends StudentController {
         for (Entity bookmark : bookmarks) {
             if (bookmark.getArrayValueByIndex(0).equals(studentID) && 
                 bookmark.getArrayValueByIndex(1).equals(internshipID)) {
-                System.out.println("This internship is already bookmarked.");
+                // Remove the bookmark
+                removeBookmark(studentID, internshipID);
+                System.out.println("Bookmark removed!");
                 return;
             }
         }
@@ -100,6 +101,40 @@ public class ViewInternshipController extends StudentController {
         // Create new bookmark entry using BookmarkEntity
         BookmarkEntity newBookmark = new BookmarkEntity(studentID, internshipID);
         DatabaseManager.appendEntry(bookmarksFile, newBookmark);
+    }
+
+    private void removeBookmark(String studentID, String internshipID) {
+        String bookmarksFile = PathResolver.resource("bookmarked_internships.csv");
+        List<Entity> bookmarks = DatabaseManager.getDatabase(bookmarksFile, new ArrayList<>(), "Bookmark");
+        List<Entity> updatedBookmarks = new ArrayList<>();
+        
+        for (Entity bookmark : bookmarks) {
+            String bStudentID = bookmark.getArrayValueByIndex(0);
+            String bInternshipID = bookmark.getArrayValueByIndex(1);
+            
+            // Keep all bookmarks except the one to be removed
+            if (!(bStudentID.equals(studentID) && bInternshipID.equals(internshipID))) {
+                updatedBookmarks.add(bookmark);
+            }
+        }
+        
+        // Rewrite the file with updated bookmarks
+        rewriteBookmarksFile(bookmarksFile, updatedBookmarks);
+    }
+
+    private void rewriteBookmarksFile(String filePath, List<Entity> bookmarks) {
+        try (java.io.BufferedWriter bw = new java.io.BufferedWriter(new java.io.FileWriter(filePath, false))) {
+            // Write header
+            bw.write("StudentID,InternshipID");
+            bw.newLine();
+            // Write all bookmarks
+            for (Entity bookmark : bookmarks) {
+                bw.write(bookmark.toCSVFormat());
+                bw.newLine();
+            }
+        } catch (java.io.IOException ex) {
+            ex.printStackTrace();
+        }
     }
 }
 
