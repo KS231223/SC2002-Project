@@ -53,9 +53,53 @@ public class ViewInternshipController extends StudentController {
         StudentFilterService.sortInternships(filteredInternships, filters);
         display.print_menu(filters);
         display.print_list(filteredInternships);
-        System.out.println("\nPress Enter to return...");
-        display.get_user_input();
+        handleBookmarking(filteredInternships);
         router.pop();
+    }
+
+    private void handleBookmarking(List<InternshipEntity> internships) {
+        while (true) {
+            System.out.println("\nEnter internship ID to bookmark (or 'done' to exit): ");
+            String input = display.get_user_input().trim();
+            
+            if (input.equalsIgnoreCase("done")) {
+                break;
+            }
+
+            InternshipEntity selectedInternship = null;
+            for (InternshipEntity internship : internships) {
+                if (internship.get(InternshipEntity.InternshipField.InternshipID).equals(input)) {
+                    selectedInternship = internship;
+                    break;
+                }
+            }
+
+            if (selectedInternship == null) {
+                System.out.println("Invalid internship ID. Please try again.");
+                continue;
+            }
+
+            addBookmark(studentID, input);
+            System.out.println("Internship '" + selectedInternship.get(InternshipEntity.InternshipField.Title) + "' has been bookmarked!");
+        }
+    }
+
+    private void addBookmark(String studentID, String internshipID) {
+        String bookmarksFile = PathResolver.resource("bookmarked_internships.csv");
+        List<Entity> bookmarks = DatabaseManager.getDatabase(bookmarksFile, new ArrayList<>(), "Bookmark");
+        
+        // Check if already bookmarked
+        for (Entity bookmark : bookmarks) {
+            if (bookmark.getArrayValueByIndex(0).equals(studentID) && 
+                bookmark.getArrayValueByIndex(1).equals(internshipID)) {
+                System.out.println("This internship is already bookmarked.");
+                return;
+            }
+        }
+        
+        // Create new bookmark entry using BookmarkEntity
+        BookmarkEntity newBookmark = new BookmarkEntity(studentID, internshipID);
+        DatabaseManager.appendEntry(bookmarksFile, newBookmark);
     }
 }
 

@@ -9,8 +9,15 @@ public class DatabaseManager {
         outList.clear();
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line;
+            boolean isFirstLine = true;
             while ((line = br.readLine()) != null) {
                 if (line.trim().isEmpty()) continue;
+                // Skip header line
+                if (isFirstLine && (line.contains("ID") || line.contains("StudentID") || line.contains("Username"))) {
+                    isFirstLine = false;
+                    continue;
+                }
+                isFirstLine = false;
                 Entity e = switch (entityType) {
                     // wow very cool!
                     case "Student" -> new StudentEntity(line);
@@ -19,6 +26,7 @@ public class DatabaseManager {
                     case "Internship" -> new InternshipEntity(line);
                     case "Application" -> new ApplicationEntity(line);
                     case "User" -> new UserEntity(line);
+                    case "Bookmark" -> new BookmarkEntity(line);
                     default -> null;
                 };
                 if (e != null) outList.add(e);

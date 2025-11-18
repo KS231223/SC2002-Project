@@ -36,7 +36,9 @@ public class StudentHomePageController extends StudentController {
                     case "6" -> new WithdrawalRequestController(router, scanner, studentID);
                     case "7" -> new AcceptOfferController(router, scanner, studentID);
                     case "8" -> new PasswordChanger(router, scanner, userID); // run change password
-                    case "9" -> {
+                    case "9" -> new ViewBookmarkedInternshipsController(router, scanner, studentID);
+                    case "10" -> new ViewApplicationHistoryController(router, scanner, studentID);
+                    case "11" -> {
                         System.out.println("Logging out...");
                         router.pop();
                         return; // exit the loop
@@ -69,7 +71,9 @@ public class StudentHomePageController extends StudentController {
             System.out.println("6. Request withdrawal");
             System.out.println("7. Accept internship offer");
             System.out.println("8. Change password");
-            System.out.println("9. Logout");
+            System.out.println("9. View bookmarked internships");
+            System.out.println("10. View application history");
+            System.out.println("11. Logout");
             System.out.print("Select an option: ");
         }
     }
