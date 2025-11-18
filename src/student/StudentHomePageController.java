@@ -2,8 +2,7 @@ package student;
 
 import common.*;
 import exceptions.*;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 /**
@@ -12,20 +11,14 @@ import java.util.Scanner;
  */
 public class StudentHomePageController extends StudentController {
 
-    private final Display studentDisplay;
-    private ControllerFactory controllerFactory;
+    private final StudentHomeDisplay studentDisplay;
 
     // Constructor
     @SuppressWarnings("LeakingThisInConstructor")
     public StudentHomePageController(Router router, Scanner scanner, EntityStore entityStore, String studentID) throws InvalidStudentIDException {
         super(router, scanner, entityStore, studentID);
         this.studentDisplay = new StudentHomeDisplay(this);
-        this.controllerFactory = createControllerFactory();
         router.replace(this); // swap into this controller
-    }
-
-    protected ControllerFactory createControllerFactory() {
-        return new StudentHomeRegistry(router, scanner, entityStore, studentID);
     }
 
     @Override
@@ -37,6 +30,12 @@ public class StudentHomePageController extends StudentController {
     private void handleMenu() {
         while (true) {
             studentDisplay.print_menu();
+            if (!scanner.hasNextLine()) {
+                System.out.println("Input stream closed. Logging out...");
+                router.pop();
+                return;
+            }
+
             String choice = studentDisplay.get_user_input();
 
             try {
@@ -49,7 +48,9 @@ public class StudentHomePageController extends StudentController {
                     case "6" -> new WithdrawalRequestController(router, scanner, entityStore, studentID);
                     case "7" -> new AcceptOfferController(router, scanner, entityStore, studentID);
                     case "8" -> new PasswordChanger(router, scanner, entityStore, userID); // run change password
-                    case "9" -> {
+                    case "9" -> new ViewBookmarkedInternshipsController(router, scanner, entityStore, studentID);
+                    case "10" -> new ViewApplicationHistoryController(router, scanner, entityStore, studentID);
+                    case "11" -> {
                         System.out.println("Logging out...");
                         router.pop();
                         return; // exit the loop
@@ -58,6 +59,10 @@ public class StudentHomePageController extends StudentController {
                 }
             } catch (InvalidStudentIDException ex) {
                 System.out.println("An error occurred: " + ex.getMessage());
+            } catch (NoSuchElementException | IllegalStateException eof) {
+                System.out.println("Input stream closed. Logging out...");
+                router.pop();
+                return;
             } catch (RuntimeException ex) {
                 System.out.println("An unexpected error occurred: " + ex.getMessage());
             }
@@ -65,12 +70,10 @@ public class StudentHomePageController extends StudentController {
     }
 
     // Private inner display class
-
-}
-class StudentHomeDisplay extends Display {
-    public StudentHomeDisplay(Controller owner) {
-        super(owner);
-    }
+    private static final class StudentHomeDisplay extends Display {
+        private StudentHomeDisplay(Controller owner) {
+            super(owner);
+        }
 
         /**
          * Prints the student dashboard menu options.
@@ -86,7 +89,9 @@ class StudentHomeDisplay extends Display {
             System.out.println("6. Request withdrawal");
             System.out.println("7. Accept internship offer");
             System.out.println("8. Change password");
-            System.out.println("9. Logout");
+            System.out.println("9. View bookmarked internships");
+            System.out.println("10. View application history");
+            System.out.println("11. Logout");
             System.out.print("Select an option: ");
         }
     }

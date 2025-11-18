@@ -40,7 +40,7 @@ public class CreateInternshipController extends CRController {
     public void initialize() {
         try {
             System.out.println("=== Create New Internship ===");
-            String id = UUID.randomUUID().toString();
+            String id = display.ask("Enter internship ID (EG.CR-INT-001): ");
             String title = display.ask("Enter internship title: ");
             String desc = display.ask("Enter description: ");
             String level = display.ask("Enter level (Basic/Intermediate/Advanced): ").trim();

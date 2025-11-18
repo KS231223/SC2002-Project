@@ -4,6 +4,7 @@ import common.Controller;
 import common.Display;
 import common.EntityStore;
 import common.Router;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 /**
@@ -42,12 +43,23 @@ public class Authentication extends Controller {
                 // Show menu
                 authenticationDisplay.print_menu();
 
+                // If scripted input is exhausted (automated tests), exit gracefully
+                if (!scanner.hasNextLine()) {
+                    System.out.println("Input stream closed. Exiting system...");
+                    router.pop();
+                    break;
+                }
+
                 // Read user input
                 String inputValue = authenticationDisplay.get_user_input();
 
                 // Try to route
                 validChoice = route_to(inputValue);
 
+            } catch (NoSuchElementException | IllegalStateException eof) {
+                System.out.println("Input stream closed unexpectedly. Exiting system...");
+                router.pop();
+                break;
             } catch (Exception e) {
                 System.err.println("An error occurred: " + e.getMessage());
                 System.out.println("Please try again.\n");

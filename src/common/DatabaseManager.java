@@ -110,6 +110,20 @@ class UserEntityFactory implements EntityFactory {
     }
 }
 
+/**
+ * Factory for creating {@link BookmarkEntity} instances.
+ */
+class BookmarkEntityFactory implements EntityFactory {
+    @Override
+    public Entity createEntity(String csvLine) {
+        return new BookmarkEntity(csvLine);
+    }
+    @Override
+    public boolean canHandle(String entityType) {
+        return "Bookmark".equals(entityType);
+    }
+}
+
 // Registry for entity factories (OCP compliant)
 /**
  * Maintains the list of entity factories and routes creation requests.
@@ -125,6 +139,7 @@ class EntityFactoryRegistry {
         factories.add(new InternshipEntityFactory());
         factories.add(new ApplicationEntityFactory());
         factories.add(new UserEntityFactory());
+        factories.add(new BookmarkEntityFactory());
     }
 
     /**
@@ -191,28 +206,30 @@ class StandardFileOperations implements FileOperations {
             while ((line = br.readLine()) != null) {
                 if (line.trim().isEmpty()) continue;
                 // Skip header line
-                if (isFirstLine && (line.contains("ID") || line.contains("StudentID") || line.contains("Username"))) {
+                if (isFirstLine && looksLikeHeader(line)) {
                     isFirstLine = false;
                     continue;
                 }
                 isFirstLine = false;
-                Entity e = switch (entityType) {
-                    // wow very cool!
-                    case "Student" -> new StudentEntity(line);
-                    case "Staff" -> new StaffEntity(line);
-                    case "CR" -> new CREntity(line);
-                    case "Internship" -> new InternshipEntity(line);
-                    case "Application" -> new ApplicationEntity(line);
-                    case "User" -> new UserEntity(line);
-                    case "Bookmark" -> new BookmarkEntity(line);
-                    default -> null;
-                };
-                if (e != null) outList.add(e);
+                lines.add(line);
             }
         } catch (IOException ex) {
             System.err.println("Failed to read file " + filePath + ": " + ex.getMessage());
         }
         return lines;
+    }
+
+    private boolean looksLikeHeader(String line) {
+        String trimmed = line.trim();
+        if (trimmed.isEmpty()) {
+            return true;
+        }
+        String upper = trimmed.toUpperCase(Locale.ROOT);
+        return upper.startsWith("ID,")
+                || upper.startsWith("STUDENTID")
+                || upper.startsWith("USERNAME")
+                || upper.startsWith("USERID")
+                || upper.startsWith("CRID,");
     }
 
     @Override

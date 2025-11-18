@@ -12,16 +12,16 @@ public class ViewBookmarkedInternshipsController extends StudentController {
     private static final String INTERNSHIP_FILE =
         PathResolver.resource("internship_opportunities.csv");
 
-    public ViewBookmarkedInternshipsController(Router router, Scanner scanner, String studentID) throws InvalidStudentIDException {
-        super(router, scanner, studentID);
+    public ViewBookmarkedInternshipsController(Router router, Scanner scanner, EntityStore entityStore, String studentID) throws InvalidStudentIDException {
+        super(router, scanner, entityStore, studentID);
         this.display = new ViewBookmarkedInternshipsDisplay(this);
         router.push(this);
     }
 
     @Override
     public void initialize() {
-        List<Entity> bookmarks = DatabaseManager.getDatabase(BOOKMARKS_FILE, new ArrayList<>(), "Bookmark");
-        List<Entity> allInternships = DatabaseManager.getDatabase(INTERNSHIP_FILE, new ArrayList<>(), "Internship");
+        List<Entity> bookmarks = entityStore.loadAll(BOOKMARKS_FILE, "Bookmark");
+        List<Entity> allInternships = entityStore.loadAll(INTERNSHIP_FILE, "Internship");
         List<Entity> myBookmarkedInternships = new ArrayList<>();
 
         for (Entity bookmark : bookmarks) {

@@ -12,16 +12,16 @@ public class ViewApplicationHistoryController extends StudentController {
     private static final String INTERNSHIP_FILE =
         PathResolver.resource("internship_opportunities.csv");
 
-    public ViewApplicationHistoryController(Router router, Scanner scanner, String studentID) throws InvalidStudentIDException {
-        super(router, scanner, studentID);
+    public ViewApplicationHistoryController(Router router, Scanner scanner, EntityStore entityStore, String studentID) throws InvalidStudentIDException {
+        super(router, scanner, entityStore, studentID);
         this.display = new ViewApplicationHistoryDisplay(this);
         router.push(this);
     }
 
     @Override
     public void initialize() {
-        List<Entity> applications = DatabaseManager.getDatabase(APPLICATION_FILE, new ArrayList<>(), "Application");
-        List<Entity> internships = DatabaseManager.getDatabase(INTERNSHIP_FILE, new ArrayList<>(), "Internship");
+        List<Entity> applications = entityStore.loadAll(APPLICATION_FILE, "Application");
+        List<Entity> internships = entityStore.loadAll(INTERNSHIP_FILE, "Internship");
         List<ApplicationWithDetails> applicationHistory = new ArrayList<>();
 
         for (Entity app : applications) {

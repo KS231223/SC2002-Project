@@ -1,5 +1,2 @@
-nova.rep1@example.com,SecurePass1!,Jordan Blake,Nova Labs,Research,Lead Scientist,nova.rep1@example.com,None,None,None
-aurora.rep2@example.com,SecurePass2@,Maya Chen,Aurora Dynamics,Innovation,Product Manager,aurora.rep2@example.com,None,None,None
-pioneer.rep3@example.com,SecurePass3#,Elias Porter,Pioneer Robotics,Operations,Robotics Engineer,pioneer.rep3@example.com,None,None,None
-zenith.rep4@example.com,SecurePass4$,Priya Nair,Zenith Analytics,Analytics,Data Lead,zenith.rep4@example.com,None,None,None
-horizon.rep5@example.com,SecurePass5%,Luis Martinez,Horizon Systems,Engineering,Systems Architect,horizon.rep5@example.com,None,None,None
+CRID,Password,Name,CompanyName,Department,Position,Email,PreferredMajors,PreferredInternshipLevel,PreferredClosingDate
+luna.alvarez@luminapartners.com,Lumina#2024,Luna Alvarez,Lumina Partners,Strategic Partnerships,Director,luna.alvarez@luminapartners.com,None,None,None

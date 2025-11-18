@@ -13,6 +13,8 @@ public class ViewInternshipController extends StudentController {
     private final ViewInternshipDisplay display;
     private static final String INTERNSHIP_FILE =
         PathResolver.resource("internship_opportunities.csv");
+    private static final String BOOKMARKS_FILE =
+        PathResolver.resource("bookmarked_internships.csv");
 
     /**
      * Creates a controller to display internships respecting student filters.
@@ -77,12 +79,16 @@ public class ViewInternshipController extends StudentController {
     private void handleBookmarking(List<InternshipEntity> internships) {
         while (true) {
             System.out.println("\nEnter internship ID to bookmark/unbookmark (or 'done' to exit): ");
-            String input = display.get_user_input().trim();
-            
-            if (input.equalsIgnoreCase("done")) {
+            if (!scanner.hasNextLine()) {
+                System.out.println("Input stream closed. Returning to menu...");
                 break;
             }
 
+            String input = display.get_user_input().trim();
+            if (input.isEmpty() || input.equalsIgnoreCase("done")) {
+                break;
+            }
+            
             InternshipEntity selectedInternship = null;
             for (InternshipEntity internship : internships) {
                 if (internship.get(InternshipEntity.InternshipField.InternshipID).equals(input)) {
@@ -96,47 +102,37 @@ public class ViewInternshipController extends StudentController {
                 continue;
             }
 
-            addBookmark(studentID, input);
+            toggleBookmark(studentID, input);
         }
     }
 
-    private void addBookmark(String studentID, String internshipID) {
-        String bookmarksFile = PathResolver.resource("bookmarked_internships.csv");
-        List<Entity> bookmarks = DatabaseManager.getDatabase(bookmarksFile, new ArrayList<>(), "Bookmark");
-        
-        // Check if already bookmarked
+    private void toggleBookmark(String studentID, String internshipID) {
+        List<Entity> bookmarks = entityStore.loadAll(BOOKMARKS_FILE, "Bookmark");
+
         for (Entity bookmark : bookmarks) {
-            if (bookmark.getArrayValueByIndex(0).equals(studentID) && 
-                bookmark.getArrayValueByIndex(1).equals(internshipID)) {
-                // Remove the bookmark
-                removeBookmark(studentID, internshipID);
+            if (bookmark.getArrayValueByIndex(0).equals(studentID)
+                    && bookmark.getArrayValueByIndex(1).equals(internshipID)) {
+                removeBookmark(studentID, internshipID, bookmarks);
                 System.out.println("Bookmark removed!");
                 return;
             }
         }
-        
-        // Create new bookmark entry using BookmarkEntity
+
         BookmarkEntity newBookmark = new BookmarkEntity(studentID, internshipID);
-        DatabaseManager.appendEntry(bookmarksFile, newBookmark);
+        entityStore.append(BOOKMARKS_FILE, newBookmark);
+        System.out.println("Bookmark added!");
     }
 
-    private void removeBookmark(String studentID, String internshipID) {
-        String bookmarksFile = PathResolver.resource("bookmarked_internships.csv");
-        List<Entity> bookmarks = DatabaseManager.getDatabase(bookmarksFile, new ArrayList<>(), "Bookmark");
+    private void removeBookmark(String studentID, String internshipID, List<Entity> bookmarks) {
         List<Entity> updatedBookmarks = new ArrayList<>();
-        
         for (Entity bookmark : bookmarks) {
             String bStudentID = bookmark.getArrayValueByIndex(0);
             String bInternshipID = bookmark.getArrayValueByIndex(1);
-            
-            // Keep all bookmarks except the one to be removed
             if (!(bStudentID.equals(studentID) && bInternshipID.equals(internshipID))) {
                 updatedBookmarks.add(bookmark);
             }
         }
-        
-        // Rewrite the file with updated bookmarks
-        rewriteBookmarksFile(bookmarksFile, updatedBookmarks);
+        rewriteBookmarksFile(BOOKMARKS_FILE, updatedBookmarks);
     }
 
     private void rewriteBookmarksFile(String filePath, List<Entity> bookmarks) {
