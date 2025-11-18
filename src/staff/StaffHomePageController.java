@@ -17,27 +17,25 @@ import java.util.Set;
 public class StaffHomePageController extends StaffController {
 
     private final Display staffDisplay;
-    private final StaffReviewFilters filters = new StaffReviewFilters();
+    private ControllerFactory controllerFactory;
+    private final StaffReviewFilters filters;
 
-    /**
-     * Creates a controller for the staff home page.
-     *
-     * @param router  navigation helper used to swap controllers
-     * @param scanner shared input stream for console interactions
-     * @param staffID identifier of the logged-in staff member
-     * @throws InvalidStaffIDException if {@code staffID} cannot be resolved
-     */
-    public StaffHomePageController(Router router, Scanner scanner, EntityStore entityStore, String staffID ) throws InvalidStaffIDException {
+
+    public StaffHomePageController(Router router, Scanner scanner, EntityStore entityStore, String staffID) throws InvalidStaffIDException {
         super(router, scanner, entityStore, staffID);
+        this.filters = new StaffReviewFilters();
         this.staffDisplay = new StaffHomeDisplay(this);
+        this.controllerFactory = createControllerFactory();
+        router.replace(this); // swap to this controller
     }
 
+    protected ControllerFactory createControllerFactory() {
+        return new StaffHomeRegistry(router, scanner, entityStore, staffID, filters);
+    }
     /**
      * Replaces the current controller on the router stack with this instance.
      */
-    public void open() {
-        router.replace(this);
-    }
+
 
     /**
      * Displays a welcome message and starts the staff dashboard menu loop.
@@ -54,19 +52,29 @@ public class StaffHomePageController extends StaffController {
     private void handleMenu(){
         while (true) {
             staffDisplay.print_menu();
-            String choice = staffDisplay.get_user_input();
 
-            switch (choice) {
-                case "1" -> Objects.requireNonNull(new ReviewRegistrationController(router, scanner, entityStore, staffID, filters));
-                case "2" -> Objects.requireNonNull(new ReviewInternshipController(router, scanner, entityStore, staffID, filters));
-                case "3" -> Objects.requireNonNull(new ReviewWithdrawalController(router, scanner, entityStore, staffID, filters));
-                case "4" -> editFilters();
-                case "5" -> clearFilters();
-                case "6" -> Objects.requireNonNull(new InternshipReportController(router, scanner, entityStore, staffID, filters));
-                case "7" -> Objects.requireNonNull(new PasswordChanger(router, scanner, entityStore, userID));
-                case "8" -> { System.out.println("Logging out..."); router.pop(); return; }
-                default -> System.out.println("Invalid option. Try again.");
+            String choice = staffDisplay.get_user_input();
+            if("4".equals(choice)){
+                editFilters();
+
             }
+            if ("5".equals(choice)) { // Clear filters
+                clearFilters();
+                System.out.println("All staff review filters cleared.");
+                continue;
+            }
+            if ("8".equals(choice)) { // Logout
+                System.out.println("Logging out...");
+                router.pop();
+                return;
+            }
+
+            try {
+                controllerFactory.createController(choice);
+            } catch (Exception ex) {
+                System.out.println("Invalid option. Try again.");
+            }
+
         }
     }
 

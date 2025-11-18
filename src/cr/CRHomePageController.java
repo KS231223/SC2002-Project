@@ -11,6 +11,7 @@ import java.util.Scanner;
 public class CRHomePageController extends CRController {
 
     private final Display crDisplay;
+    private ControllerFactory controllerFactory;
 
     // Constructor
 
@@ -27,7 +28,12 @@ public class CRHomePageController extends CRController {
     public CRHomePageController(Router router, Scanner scanner, EntityStore entityStore, String crID) throws InvalidCompanyRepIDException {
         super(router, scanner, entityStore, crID);
         this.crDisplay = new CRHomeDisplay(this);
+        this.controllerFactory = createControllerFactory();
         router.replace(this); // swap to this controller
+    }
+
+    protected ControllerFactory createControllerFactory() {
+        return new CRHomeRegistry(router, scanner, entityStore, userID);
     }
 
     /**
@@ -42,34 +48,30 @@ public class CRHomePageController extends CRController {
     /**
      * Processes menu interactions until the representative logs out.
      */
+
     @SuppressWarnings("ResultOfObjectAllocationIgnored")
     private void handleMenu() {
         while (true) {
             printActiveFiltersHeader();
             crDisplay.print_menu();
             String choice = crDisplay.get_user_input();
+
+            if ("7".equals(choice)) { // special case: clear filters
+                CRFilterService.clearFilters(userID);
+                System.out.println("Internship filters cleared.");
+                continue;
+            }
+            if ("9".equals(choice)) { // logout
+                System.out.println("Logging out...");
+                router.pop();
+                return;
+            }
+
             try {
-                switch (choice) {
-                    case "1" -> new ListMyInternshipsController(router, scanner, entityStore, userID);
-                    case "2" -> new CreateInternshipController(router, scanner, entityStore, userID);
-                    case "3" -> new ToggleVisibilityController(router, scanner, entityStore, userID);
-                    case "4" -> new ViewApplicationsController(router, scanner, entityStore, userID);
-                    case "5" -> new ReviewApplicationController(router, scanner, entityStore, userID);
-                    case "6" -> new FilterInternshipsController(router, scanner, entityStore, userID);
-                    case "7" -> {
-                        CRFilterService.clearFilters(userID);
-                        System.out.println("Internship filters cleared.");
-                    }
-                    case "8" -> new PasswordChanger(router, scanner, entityStore, userID); // run change password
-                    case "9" -> {
-                        System.out.println("Logging out...");
-                        router.pop();
-                        return;
-                    }
-                    default -> System.out.println("Invalid option. Try again.");
-                }
-            } catch (InvalidCompanyRepIDException ex) {
-                System.out.println("Unable to open the requested page: " + ex.getMessage());
+                // Use factory to create and instantiate controller dynamically
+                controllerFactory.createController(choice);
+            } catch (Exception ex) {
+                System.out.println("Invalid option. Try again.");
             }
         }
     }

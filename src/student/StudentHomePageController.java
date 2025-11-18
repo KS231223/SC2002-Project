@@ -2,6 +2,8 @@ package student;
 
 import common.*;
 import exceptions.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 /**
@@ -11,36 +13,27 @@ import java.util.Scanner;
 public class StudentHomePageController extends StudentController {
 
     private final Display studentDisplay;
+    private ControllerFactory controllerFactory;
 
     // Constructor
-    /**
-     * Builds the student home page controller and places it on the router.
-     *
-     * @param router    router responsible for navigation
-     * @param scanner   shared console input
-     * @param studentID identifier for the logged-in student
-     * @throws InvalidStudentIDException when {@code studentID} is invalid
-     */
     @SuppressWarnings("LeakingThisInConstructor")
     public StudentHomePageController(Router router, Scanner scanner, EntityStore entityStore, String studentID) throws InvalidStudentIDException {
         super(router, scanner, entityStore, studentID);
         this.studentDisplay = new StudentHomeDisplay(this);
-        router.replace(this); // swaps into this controller
+        this.controllerFactory = createControllerFactory();
+        router.replace(this); // swap into this controller
     }
 
-    /**
-     * Announces the dashboard and begins processing menu interactions.
-     */
+    protected ControllerFactory createControllerFactory() {
+        return new StudentHomeRegistry(router, scanner, entityStore, studentID);
+    }
+
     @Override
     public void initialize() {
         System.out.println("Student Home Page loaded successfully for " + name + "!");
         this.handleMenu();
     }
 
-    /**
-     * Runs the main menu loop until the student logs out.
-     */
-    @SuppressWarnings({"ResultOfObjectAllocationIgnored", "TooBroadCatch"})
     private void handleMenu() {
         while (true) {
             studentDisplay.print_menu();
@@ -51,14 +44,12 @@ public class StudentHomePageController extends StudentController {
                     case "1" -> new ViewInternshipController(router, scanner, entityStore, studentID);
                     case "2" -> new UpdateInternshipFiltersController(router, scanner, entityStore, studentID);
                     case "3" -> handleClearFilters();
-                    case "4" -> new ApplyInternshipController(router, scanner, studentID);
-                    case "5" -> new ViewApplicationsController(router, scanner, studentID);
-                    case "6" -> new WithdrawalRequestController(router, scanner, studentID);
-                    case "7" -> new AcceptOfferController(router, scanner, studentID);
-                    case "8" -> new PasswordChanger(router, scanner, userID); // run change password
-                    case "9" -> new ViewBookmarkedInternshipsController(router, scanner, studentID);
-                    case "10" -> new ViewApplicationHistoryController(router, scanner, studentID);
-                    case "11" -> {
+                    case "4" -> new ApplyInternshipController(router, scanner, entityStore, studentID);
+                    case "5" -> new ViewApplicationsController(router, scanner, entityStore, studentID);
+                    case "6" -> new WithdrawalRequestController(router, scanner, entityStore, studentID);
+                    case "7" -> new AcceptOfferController(router, scanner, entityStore, studentID);
+                    case "8" -> new PasswordChanger(router, scanner, entityStore, userID); // run change password
+                    case "9" -> {
                         System.out.println("Logging out...");
                         router.pop();
                         return; // exit the loop
@@ -73,20 +64,13 @@ public class StudentHomePageController extends StudentController {
         }
     }
 
-    // Private inner display class for student home page
-    /**
-     * Display wrapper that renders the student dashboard menu.
-     */
-    private static class StudentHomeDisplay extends Display {
+    // Private inner display class
 
-        /**
-         * Creates a display instance bound to the student home controller.
-         *
-         * @param owner parent controller
-         */
-        public StudentHomeDisplay(Controller owner) {
-            super(owner);
-        }
+}
+class StudentHomeDisplay extends Display {
+    public StudentHomeDisplay(Controller owner) {
+        super(owner);
+    }
 
         /**
          * Prints the student dashboard menu options.
@@ -102,9 +86,7 @@ public class StudentHomePageController extends StudentController {
             System.out.println("6. Request withdrawal");
             System.out.println("7. Accept internship offer");
             System.out.println("8. Change password");
-            System.out.println("9. View bookmarked internships");
-            System.out.println("10. View application history");
-            System.out.println("11. Logout");
+            System.out.println("9. Logout");
             System.out.print("Select an option: ");
         }
     }
