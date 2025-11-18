@@ -12,8 +12,9 @@ public class ViewApplicationsController extends CRController {
         PathResolver.resource("internship_opportunities.csv");
     private ViewApplicationsDisplay display;
 
-    public ViewApplicationsController(Router router, Scanner scanner, String crID) throws InvalidCompanyRepIDException {
-        super(router, scanner, crID);
+    @SuppressWarnings("LeakingThisInConstructor")
+    public ViewApplicationsController(Router router, Scanner scanner, EntityStore entityStore, String crID) throws InvalidCompanyRepIDException {
+        super(router, scanner, entityStore, crID);
         this.display = new ViewApplicationsDisplay(this);
         router.push(this);
     }
@@ -21,8 +22,8 @@ public class ViewApplicationsController extends CRController {
     @Override
     public void initialize() {
         try {
-            List<Entity> apps = DatabaseManager.getDatabase(APPLICATION_FILE, new ArrayList<>(), "Application");
-            List<Entity> internships = DatabaseManager.getDatabase(INTERNSHIP_FILE, new ArrayList<>(), "Internship");
+            List<Entity> apps = entityStore.loadAll(APPLICATION_FILE, "Application");
+            List<Entity> internships = entityStore.loadAll(INTERNSHIP_FILE, "Internship");
             CRFilterService.CRFilters filters = CRFilterService.getFilters(userID);
 
             Map<String, InternshipEntity> myFilteredInternships = new HashMap<>();

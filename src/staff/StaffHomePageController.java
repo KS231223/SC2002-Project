@@ -27,8 +27,8 @@ public class StaffHomePageController extends StaffController {
      * @param staffID identifier of the logged-in staff member
      * @throws InvalidStaffIDException if {@code staffID} cannot be resolved
      */
-    public StaffHomePageController(Router router, Scanner scanner, String staffID ) throws InvalidStaffIDException {
-        super(router, scanner, staffID);
+    public StaffHomePageController(Router router, Scanner scanner, EntityStore entityStore, String staffID ) throws InvalidStaffIDException {
+        super(router, scanner, entityStore, staffID);
         this.staffDisplay = new StaffHomeDisplay(this);
     }
 
@@ -57,13 +57,13 @@ public class StaffHomePageController extends StaffController {
             String choice = staffDisplay.get_user_input();
 
             switch (choice) {
-                case "1" -> Objects.requireNonNull(new ReviewRegistrationController(router, scanner, staffID, filters));
-                case "2" -> Objects.requireNonNull(new ReviewInternshipController(router, scanner, staffID, filters));
-                case "3" -> Objects.requireNonNull(new ReviewWithdrawalController(router, scanner, staffID, filters));
+                case "1" -> Objects.requireNonNull(new ReviewRegistrationController(router, scanner, entityStore, staffID, filters));
+                case "2" -> Objects.requireNonNull(new ReviewInternshipController(router, scanner, entityStore, staffID, filters));
+                case "3" -> Objects.requireNonNull(new ReviewWithdrawalController(router, scanner, entityStore, staffID, filters));
                 case "4" -> editFilters();
                 case "5" -> clearFilters();
-                case "6" -> Objects.requireNonNull(new InternshipReportController(router, scanner, staffID, filters));
-                case "7" -> Objects.requireNonNull(new PasswordChanger(router, scanner, userID));
+                case "6" -> Objects.requireNonNull(new InternshipReportController(router, scanner, entityStore, staffID, filters));
+                case "7" -> Objects.requireNonNull(new PasswordChanger(router, scanner, entityStore, userID));
                 case "8" -> { System.out.println("Logging out..."); router.pop(); return; }
                 default -> System.out.println("Invalid option. Try again.");
             }

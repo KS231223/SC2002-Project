@@ -22,8 +22,8 @@ public class ViewApplicationsController extends StudentController {
      * @throws InvalidStudentIDException when {@code studentID} is invalid
      */
     @SuppressWarnings("LeakingThisInConstructor")
-    public ViewApplicationsController(Router router, Scanner scanner, String studentID) throws InvalidStudentIDException {
-        super(router, scanner, studentID);
+    public ViewApplicationsController(Router router, Scanner scanner, EntityStore entityStore, String studentID) throws InvalidStudentIDException {
+        super(router, scanner, entityStore, studentID);
         this.display = new ViewApplicationsDisplay(this);
         router.push(this);
     }
@@ -34,7 +34,7 @@ public class ViewApplicationsController extends StudentController {
      */
     @Override
     public void initialize() {
-        List<Entity> applications = DatabaseManager.getDatabase(APPLICATION_FILE, new ArrayList<>(), "Application");
+        List<Entity> applications = entityStore.loadAll(APPLICATION_FILE, "Application");
         List<Entity> myApps = new ArrayList<>();
 
         for (Entity e : applications) {

@@ -3,7 +3,6 @@ package ims;
 import common.*;
 import cr.*;
 import exceptions.*;
-import java.io.*;
 import java.util.*;
 import staff.*;
 import student.*;
@@ -22,8 +21,8 @@ public class LoginController extends Controller {
      * @param router  navigation stack shared across controllers
      * @param scanner scanner used to capture user credentials
      */
-    public LoginController(Router router, Scanner scanner) {
-        super(router, scanner);
+    public LoginController(Router router, Scanner scanner, EntityStore entityStore) {
+        super(router, scanner, entityStore);
         this.loginDisplay = new LoginDisplay(this);
     }
 
@@ -56,10 +55,10 @@ public class LoginController extends Controller {
                 try {
                     switch (role) {
                         case "staff" -> {
-                            new StaffHomePageController(router, scanner, username).open();
+                            new StaffHomePageController(router, scanner, entityStore, username).open();
                         }
-                        case "student" -> Objects.requireNonNull(new StudentHomePageController(router, scanner, username));
-                        case "cr" -> Objects.requireNonNull(new CRHomePageController(router, scanner, username));
+                        case "student" -> Objects.requireNonNull(new StudentHomePageController(router, scanner, entityStore, username));
+                        case "cr" -> Objects.requireNonNull(new CRHomePageController(router, scanner, entityStore, username));
                         default -> System.err.println("Unknown role: " + role);
                     }
                 } catch (InvalidStaffIDException | InvalidStudentIDException | InvalidCompanyRepIDException e) {
@@ -83,13 +82,7 @@ public class LoginController extends Controller {
      * @return matching role string or {@code "None"} when the credentials are invalid
      */
     private String get_corresponding_role(String username, String password) {
-        File file = new File(USER_DB_PATH);
-        if (!file.exists()) {
-            System.out.println("User database not found.");
-            return "None";
-        }
-
-        List<Entity> users = DatabaseManager.getDatabase(USER_DB_PATH, new ArrayList<>(), "User");
+        List<Entity> users = entityStore.loadAll(USER_DB_PATH, "User");
 
         for (Entity e : users) {
             if (!(e instanceof UserEntity user)) continue;

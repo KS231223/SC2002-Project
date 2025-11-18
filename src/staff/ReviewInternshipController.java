@@ -25,8 +25,8 @@ public class ReviewInternshipController extends Controller {
      * @param filters  shared filters to apply when listing submissions
      */
     @SuppressWarnings("LeakingThisInConstructor")
-    public ReviewInternshipController(Router router, Scanner scanner, String staffID, StaffReviewFilters filters) {
-        super(router, scanner);
+    public ReviewInternshipController(Router router, Scanner scanner, EntityStore entityStore, String staffID, StaffReviewFilters filters) {
+        super(router, scanner, entityStore);
         this.display = new ReviewInternshipDisplay(this);
         this.filters = filters;
         router.push(this);
@@ -38,7 +38,7 @@ public class ReviewInternshipController extends Controller {
      */
     @Override
     public void initialize() {
-        List<Entity> pendingRaw = DatabaseManager.getDatabase(PENDING_INTERNSHIP_FILE, new ArrayList<>(), "Internship");
+        List<Entity> pendingRaw = entityStore.loadAll(PENDING_INTERNSHIP_FILE, "Internship");
         StaffReviewFilters.ApplicationStats stats = loadApplicationStats();
         List<InternshipEntity> pending = new ArrayList<>();
         for (Entity entity : pendingRaw) {
@@ -73,9 +73,9 @@ public class ReviewInternshipController extends Controller {
         display.print_entry(internshipEntity);
         String choice = display.get_user_input().trim().toUpperCase();
 
-        if (choice.equals("A")) DatabaseManager.appendEntry(INTERNSHIP_FILE, internshipEntity);
+        if (choice.equals("A")) entityStore.append(INTERNSHIP_FILE, internshipEntity);
         if (choice.equals("A") || choice.equals("R"))
-            DatabaseManager.deleteEntry(PENDING_INTERNSHIP_FILE, internshipId, "Internship");
+            entityStore.delete(PENDING_INTERNSHIP_FILE, internshipId, "Internship");
 
         System.out.println("\nReview complete.");
         router.pop();
@@ -87,7 +87,7 @@ public class ReviewInternshipController extends Controller {
      * @return statistics bundle keyed by internship identifier
      */
     private StaffReviewFilters.ApplicationStats loadApplicationStats() {
-        List<Entity> applications = DatabaseManager.getDatabase(APPLICATION_FILE, new ArrayList<>(), "Application");
+        List<Entity> applications = entityStore.loadAll(APPLICATION_FILE, "Application");
         Map<String, Long> total = new HashMap<>();
         Map<String, Long> accepted = new HashMap<>();
         for (Entity entity : applications) {

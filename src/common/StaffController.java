@@ -1,8 +1,6 @@
 package common;
 
 import exceptions.*;
-import java.io.File;
-import java.io.IOException;
 import java.util.Scanner;
 
 /**
@@ -19,41 +17,19 @@ public abstract class StaffController extends UserController {
     /**
      * Loads staff metadata based on the provided identifier.
      */
-    public StaffController(Router router,Scanner scanner,String staffID) throws InvalidStaffIDException {
-        super(router,scanner,staffID);
+    public StaffController(Router router, Scanner scanner, EntityStore entityStore, String staffID) throws InvalidStaffIDException {
+        super(router, scanner, entityStore, staffID);
         this.staffID = staffID;
 
-    File file = new File(PathResolver.resource("staff.csv"));
-        boolean found = false;
-
-        if (!file.exists()) {
-            throw new InvalidStaffIDException("Staff database not found.");
-        }
-
-        try (Scanner reader = new Scanner(file)) {
-            while (reader.hasNextLine()) {
-                String line = reader.nextLine().trim();
-                if (line.isEmpty()) continue;
-
-                String[] parts = line.split(","); // StaffID,Name,Role,Department,Email
-                if (parts.length < 5) continue;
-
-                if (parts[0].equals(staffID)) {
-                    this.name = parts[1].trim();
-                    this.staffRole = parts[2].trim();
-                    this.department = parts[3].trim();
-                    this.email = parts[4].trim();
-                    found = true;
-                    break;
-                }
-            }
-        } catch (IOException e) {
-            throw new InvalidStaffIDException("Error reading staff.csv: " + e.getMessage());
-        }
-
-        if (!found) {
+        Entity entity = entityStore.findById(PathResolver.resource("staff.csv"), staffID, "Staff");
+        if (!(entity instanceof StaffEntity staff)) {
             throw new InvalidStaffIDException("Invalid staff ID: " + staffID);
         }
+
+        this.name = staff.get(StaffEntity.StaffField.Name);
+        this.staffRole = staff.get(StaffEntity.StaffField.Role);
+        this.department = staff.get(StaffEntity.StaffField.Department);
+        this.email = staff.get(StaffEntity.StaffField.Email);
     }
 
     @Override

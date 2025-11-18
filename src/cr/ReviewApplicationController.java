@@ -11,16 +11,17 @@ public class ReviewApplicationController extends CRController {
     private static final String INTERNSHIP_FILE =
         PathResolver.resource("internship_opportunities.csv");
 
-    public ReviewApplicationController(Router router, Scanner scanner, String crID) throws InvalidCompanyRepIDException {
-        super(router, scanner, crID);
+    @SuppressWarnings("LeakingThisInConstructor")
+    public ReviewApplicationController(Router router, Scanner scanner, EntityStore entityStore, String crID) throws InvalidCompanyRepIDException {
+        super(router, scanner, entityStore, crID);
         this.display = new ReviewApplicationDisplay(this);
         router.push(this);
     }
 
     @Override
     public void initialize() {
-        List<Entity> applications = DatabaseManager.getDatabase(APPLICATION_FILE, new ArrayList<>(), "Application");
-        List<Entity> internships = DatabaseManager.getDatabase(INTERNSHIP_FILE, new ArrayList<>(), "Internship");
+        List<Entity> applications = entityStore.loadAll(APPLICATION_FILE, "Application");
+        List<Entity> internships = entityStore.loadAll(INTERNSHIP_FILE, "Internship");
         CRFilterService.CRFilters filters = CRFilterService.getFilters(userID);
 
         Map<String, InternshipEntity> myFilteredInternships = new HashMap<>();
@@ -68,12 +69,13 @@ public class ReviewApplicationController extends CRController {
         display.print_entry(application);
         String choice = display.get_user_input().trim().toUpperCase(Locale.ENGLISH);
 
+        ApplicationHandler handler = new ApplicationHandler(entityStore);
         try {
             switch (choice) {
-                case "A" -> ApplicationHandler.approveApplication(applicationId);
+                case "A" -> handler.approveApplication(applicationId);
                 case "R" -> {
                     application.set(ApplicationEntity.ApplicationField.Status, "Rejected");
-                    DatabaseManager.updateEntry(APPLICATION_FILE, applicationId, application, "Application");
+                    entityStore.update(APPLICATION_FILE, applicationId, application, "Application");
                     System.out.println("Application rejected successfully.");
                 }
                 default -> System.out.println("Invalid choice. Returning...");

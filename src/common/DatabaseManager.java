@@ -303,54 +303,49 @@ class EntityRepository {
 /**
  * Facade providing CSV-backed persistence operations for domain entities.
  */
-public class DatabaseManager {
-    private static final EntityRepository repository =
-            new EntityRepository(new StandardFileOperations());
+public class DatabaseManager implements EntityStore {
+    private final EntityRepository repository;
 
     /**
-     * Loads the requested database file into the supplied list.
-     *
-     * @param filePath CSV resource path
-     * @param outList list to populate (cleared before population)
-     * @param entityType logical entity discriminator
-     * @return reference to {@code outList}
+     * Builds a database manager backed by the default file operations.
      */
-    public static List<Entity> getDatabase(String filePath, List<Entity> outList, String entityType) {
-        outList.clear();
-        List<Entity> entities = repository.loadEntities(filePath, entityType);
-        outList.addAll(entities);
-        return outList;
+    public DatabaseManager() {
+        this(new EntityRepository(new StandardFileOperations()));
+    }
+
+    DatabaseManager(EntityRepository repository) {
+        this.repository = repository;
+    }
+
+    @Override
+    public List<Entity> loadAll(String filePath, String entityType) {
+        return repository.loadEntities(filePath, entityType);
     }
 
     /**
-     * Appends a new entry to the backing CSV file.
+     * Populates the provided list with the entities stored in {@code filePath}.
      */
-    public static void appendEntry(String filePath, Entity entry) {
-        repository.appendEntity(filePath, entry);
-    }
-
-    /**
-     * Updates the identified entry with the provided replacement entity.
-     */
-    public static void updateEntry(String filePath, String id, Entity newEntry, String entityType) {
-        List<Entity> list = repository.loadEntities(filePath, entityType);
-        list = repository.replaceById(list, id, newEntry);
-        repository.saveEntities(filePath, list);
-    }
-
-    /**
-     * Retrieves a single entry by identifier.
-     */
-    public static Entity getEntryById(String filePath, String id, String entityType) {
-        List<Entity> list = repository.loadEntities(filePath, entityType);
+    @Override
+    public Entity findById(String filePath, String id, String entityType) {
+        List<Entity> list = loadAll(filePath, entityType);
         return repository.findById(list, id);
     }
 
-    /**
-     * Removes the matching entry from the backing file.
-     */
-    public static void deleteEntry(String filePath, String id, String entityType) {
-        List<Entity> list = repository.loadEntities(filePath, entityType);
+    @Override
+    public void append(String filePath, Entity entity) {
+        repository.appendEntity(filePath, entity);
+    }
+
+    @Override
+    public void update(String filePath, String id, Entity entity, String entityType) {
+        List<Entity> list = loadAll(filePath, entityType);
+        list = repository.replaceById(list, id, entity);
+        repository.saveEntities(filePath, list);
+    }
+
+    @Override
+    public void delete(String filePath, String id, String entityType) {
+        List<Entity> list = loadAll(filePath, entityType);
         list = repository.removeById(list, id);
         repository.saveEntities(filePath, list);
     }

@@ -28,6 +28,10 @@ bin/
 ### Mac OS ###
 .DS_Store
 .sources.txt
-.TestScenarioMain.java
+src/ims/TestScenarioMain.java
 src/ims/StaffIntensiveScenarioMain.java
 src/ims/CRIntensiveScenarioMain.java
+src/ims/CR_SPAM_INTERN.java
+src/ims/CR_SPAM_REGISTRATION.java
+sources.txt
+sources.txt

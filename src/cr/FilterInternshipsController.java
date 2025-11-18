@@ -4,6 +4,7 @@ import common.CRController;
 import common.CRFilterService;
 import common.Controller;
 import common.Display;
+import common.EntityStore;
 import common.Router;
 import exceptions.InvalidCompanyRepIDException;
 import java.util.Optional;
@@ -13,8 +14,9 @@ public class FilterInternshipsController extends CRController {
 
     private final FilterInternshipsDisplay display;
 
-    public FilterInternshipsController(Router router, Scanner scanner, String crID) throws InvalidCompanyRepIDException {
-        super(router, scanner, crID);
+    @SuppressWarnings("LeakingThisInConstructor")
+    public FilterInternshipsController(Router router, Scanner scanner, EntityStore entityStore, String crID) throws InvalidCompanyRepIDException {
+        super(router, scanner, entityStore, crID);
         this.display = new FilterInternshipsDisplay(this);
         router.push(this);
     }

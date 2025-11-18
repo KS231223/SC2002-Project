@@ -25,8 +25,8 @@ public class ReviewWithdrawalController extends Controller {
      * @param filters shared filters to apply across review flows
      */
     @SuppressWarnings("LeakingThisInConstructor")
-    public ReviewWithdrawalController(Router router, Scanner scanner, String staffID, StaffReviewFilters filters) {
-        super(router, scanner);
+    public ReviewWithdrawalController(Router router, Scanner scanner, EntityStore entityStore, String staffID, StaffReviewFilters filters) {
+        super(router, scanner, entityStore);
         this.display = new ReviewWithdrawalDisplay(this);
         this.filters = filters;
         router.push(this);
@@ -38,7 +38,7 @@ public class ReviewWithdrawalController extends Controller {
      */
     @Override
     public void initialize() {
-        List<Entity> pendingRaw = DatabaseManager.getDatabase(PENDING_WITHDRAWAL_FILE, new ArrayList<>(), "Application");
+        List<Entity> pendingRaw = entityStore.loadAll(PENDING_WITHDRAWAL_FILE, "Application");
         if (pendingRaw.isEmpty()) {
             System.out.println("No pending withdrawals.");
             router.pop();
@@ -88,11 +88,12 @@ public class ReviewWithdrawalController extends Controller {
 
         // Delegate to ApplicationHandler
         if (choice.equals("A")) {
-            ApplicationHandler.withdrawApplication(withdrawalId);
+            ApplicationHandler handler = new ApplicationHandler(entityStore);
+            handler.withdrawApplication(withdrawalId);
         }
 
         if (choice.equals("A") || choice.equals("R")) {
-            DatabaseManager.deleteEntry(PENDING_WITHDRAWAL_FILE, withdrawalId, "Application");
+            entityStore.delete(PENDING_WITHDRAWAL_FILE, withdrawalId, "Application");
         }
 
         System.out.println("\nWithdrawal review complete.");
@@ -105,7 +106,7 @@ public class ReviewWithdrawalController extends Controller {
      * @return map keyed by internship identifier
      */
     private Map<String, InternshipEntity> loadInternships() {
-        List<Entity> internships = DatabaseManager.getDatabase(INTERNSHIP_FILE, new ArrayList<>(), "Internship");
+        List<Entity> internships = entityStore.loadAll(INTERNSHIP_FILE, "Internship");
         Map<String, InternshipEntity> result = new HashMap<>();
         for (Entity entity : internships) {
             if (entity instanceof InternshipEntity internship) {
@@ -121,7 +122,7 @@ public class ReviewWithdrawalController extends Controller {
      * @return statistics bundle keyed by internship identifier
      */
     private StaffReviewFilters.ApplicationStats loadApplicationStats() {
-        List<Entity> applications = DatabaseManager.getDatabase(APPLICATION_FILE, new ArrayList<>(), "Application");
+        List<Entity> applications = entityStore.loadAll(APPLICATION_FILE, "Application");
         Map<String, Long> total = new HashMap<>();
         Map<String, Long> accepted = new HashMap<>();
 

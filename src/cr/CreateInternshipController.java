@@ -26,8 +26,8 @@ public class CreateInternshipController extends CRController {
      * @throws InvalidCompanyRepIDException when {@code crID} cannot be resolved
      */
     @SuppressWarnings("LeakingThisInConstructor")
-    public CreateInternshipController(Router router, Scanner scanner, String crID) throws InvalidCompanyRepIDException {
-        super(router, scanner, crID);
+    public CreateInternshipController(Router router, Scanner scanner, EntityStore entityStore, String crID) throws InvalidCompanyRepIDException {
+        super(router, scanner, entityStore, crID);
         this.display = new CreateInternshipDisplay(this);
         router.push(this);
     }
@@ -76,7 +76,7 @@ public class CreateInternshipController extends CRController {
             }
 
             // Get company name from CR database
-            Entity thisCR = DatabaseManager.getEntryById(CR_FILE, userID, "CR");
+            Entity thisCR = entityStore.findById(CR_FILE, userID, "CR");
             if (thisCR == null) {
                 System.out.println("Error: Company Representative record not found.");
                 router.pop();
@@ -86,7 +86,7 @@ public class CreateInternshipController extends CRController {
             InternshipEntity newInternship = new InternshipEntity(id, title, desc, level, major,
                     openDate, closeDate.toString(), status, companyName, userID, slots, visibility);
 
-            DatabaseManager.appendEntry(PENDING_INTERNSHIP_FILE, newInternship);
+            entityStore.append(PENDING_INTERNSHIP_FILE, newInternship);
             System.out.println("Internship successfully created!");
         } catch (Exception e) {
             System.err.println("Error creating internship: " + e.getMessage());

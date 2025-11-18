@@ -26,8 +26,11 @@ public final class StudentFilterService {
     /**
      * Loads a student record by identifier.
      */
-    public static StudentEntity loadStudent(String studentId) {
-        Entity entity = DatabaseManager.getEntryById(STUDENT_FILE, studentId, "Student");
+    public static StudentEntity loadStudent(EntityStore store, String studentId) {
+        if (store == null) {
+            throw new IllegalArgumentException("EntityStore is required");
+        }
+        Entity entity = store.findById(STUDENT_FILE, studentId, "Student");
         if (entity == null) {
             return null;
         }
@@ -37,11 +40,14 @@ public final class StudentFilterService {
     /**
      * Persists the supplied student entity back to storage.
      */
-    public static void saveStudent(StudentEntity student) {
+    public static void saveStudent(EntityStore store, StudentEntity student) {
+        if (store == null) {
+            throw new IllegalArgumentException("EntityStore is required");
+        }
         if (student == null) {
             return;
         }
-        DatabaseManager.updateEntry(STUDENT_FILE, student.getStudentID(), student, "Student");
+        store.update(STUDENT_FILE, student.getStudentID(), student, "Student");
     }
 
     /**
@@ -61,13 +67,16 @@ public final class StudentFilterService {
     /**
      * Clears persisted filters for the student identified by {@code studentId}.
      */
-    public static void clearFilters(String studentId) {
-        StudentEntity student = loadStudent(studentId);
+    public static void clearFilters(EntityStore store, String studentId) {
+        if (store == null) {
+            throw new IllegalArgumentException("EntityStore is required");
+        }
+        StudentEntity student = loadStudent(store, studentId);
         if (student == null) {
             throw new IllegalArgumentException("Student not found: " + studentId);
         }
         resetFilters(student);
-        saveStudent(student);
+        saveStudent(store, student);
     }
 
     /**
@@ -146,8 +155,11 @@ public final class StudentFilterService {
     /**
      * Lists company names extracted from internships, in alphabetical order.
      */
-    public static List<String> listCompanies() {
-        List<Entity> internships = DatabaseManager.getDatabase(INTERNSHIP_FILE, new ArrayList<>(), "Internship");
+    public static List<String> listCompanies(EntityStore store) {
+        if (store == null) {
+            throw new IllegalArgumentException("EntityStore is required");
+        }
+        List<Entity> internships = store.loadAll(INTERNSHIP_FILE, "Internship");
         Set<String> companies = new LinkedHashSet<>();
         for (Entity entity : internships) {
             InternshipEntity internship = (InternshipEntity) entity;

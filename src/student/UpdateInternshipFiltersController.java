@@ -22,8 +22,8 @@ public class UpdateInternshipFiltersController extends StudentController {
      * @throws InvalidStudentIDException when {@code studentID} cannot be located
      */
     @SuppressWarnings("LeakingThisInConstructor")
-    public UpdateInternshipFiltersController(Router router, Scanner scanner, String studentID) throws InvalidStudentIDException {
-        super(router, scanner, studentID);
+    public UpdateInternshipFiltersController(Router router, Scanner scanner, EntityStore entityStore, String studentID) throws InvalidStudentIDException {
+        super(router, scanner, entityStore, studentID);
         this.display = new UpdateInternshipFiltersDisplay(this);
         router.push(this);
     }
@@ -34,7 +34,7 @@ public class UpdateInternshipFiltersController extends StudentController {
      */
     @Override
     public void initialize() {
-        studentEntity = StudentFilterService.loadStudent(studentID);
+        studentEntity = StudentFilterService.loadStudent(entityStore, studentID);
         if (studentEntity == null) {
             System.out.println("Unable to load student filters. Returning to menu.");
             router.pop();
@@ -52,7 +52,7 @@ public class UpdateInternshipFiltersController extends StudentController {
                 case "4" -> updateMajor();
                 case "5" -> updateClosingSort();
                 case "6" -> {
-                    StudentFilterService.saveStudent(studentEntity);
+                    StudentFilterService.saveStudent(entityStore, studentEntity);
                     System.out.println("Filters saved. Returning to menu...");
                     router.pop();
                     running = false;
@@ -85,7 +85,7 @@ public class UpdateInternshipFiltersController extends StudentController {
      * Updates the preferred company filter based on user selection or input.
      */
     private void updateCompany() {
-        List<String> companies = StudentFilterService.listCompanies();
+        List<String> companies = StudentFilterService.listCompanies(entityStore);
         display.printCompanyOptions(companies);
         String choice = display.get_user_input();
         String newValue;

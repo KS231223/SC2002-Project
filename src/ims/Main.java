@@ -1,5 +1,7 @@
 package ims;
 
+import common.DatabaseManager;
+import common.EntityStore;
 import common.Router;
 import java.util.Scanner;
 
@@ -14,7 +16,8 @@ public class Main {
         System.out.println("Starting Internship Placement Management System...\n");
         Router router = new Router();
         Scanner scanner = new Scanner(System.in);
-        Authentication authentication = new Authentication(router, scanner);
+        EntityStore entityStore = new DatabaseManager();
+        Authentication authentication = new Authentication(router, scanner, entityStore);
         authentication.start();
 
     }

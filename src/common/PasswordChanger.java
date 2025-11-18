@@ -1,8 +1,7 @@
 package common;
 
 import exceptions.InvalidUserIDException;
-import java.io.*;
-import java.util.*;
+import java.util.Scanner;
 
 /**
  * Handles the change-password flow for any authenticated user.
@@ -16,8 +15,8 @@ public class PasswordChanger extends Controller {
     /**
      * Creates a password change controller and immediately schedules it with the router.
      */
-    public PasswordChanger(Router router,Scanner scanner, String username) {
-        super(router,scanner);
+    public PasswordChanger(Router router, Scanner scanner, EntityStore entityStore, String username) {
+        super(router, scanner, entityStore);
         this.username = username;
         this.display = new ChangePasswordDisplay(this); // tied to this instance
         router.push(this);
@@ -47,45 +46,13 @@ public class PasswordChanger extends Controller {
      * Persists a new password for the current user in {@code users.csv}.
      */
     private void changePassword(String newPassword) throws InvalidUserIDException {
-        File file = new File(PathResolver.resource("users.csv"));
-        if (!file.exists()) {
-            throw new InvalidUserIDException("User database not found.");
-        }
-
-        List<String> lines = new ArrayList<>();
-        boolean found = false;
-
-        try (Scanner reader = new Scanner(file)) {
-            while (reader.hasNextLine()) {
-                String line = reader.nextLine();
-                String[] parts = line.split(",");
-                if (parts.length < 2) {
-                    lines.add(line);
-                    continue;
-                }
-
-                if (parts[0].equals(username)) {
-                    parts[1] = newPassword;
-                    found = true;
-                }
-
-                lines.add(String.join(",", parts));
-            }
-        } catch (FileNotFoundException e) {
-            throw new InvalidUserIDException("User database not accessible: " + e.getMessage());
-        }
-
-        if (!found) {
+        Entity entity = entityStore.findById(PathResolver.resource("users.csv"), username, "User");
+        if (!(entity instanceof UserEntity user)) {
             throw new InvalidUserIDException("User not found in database: " + username);
         }
 
-        try (PrintWriter writer = new PrintWriter(new FileWriter(file))) {
-            for (String line : lines) {
-                writer.println(line);
-            }
-        } catch (IOException e) {
-            throw new InvalidUserIDException("Unable to persist password update: " + e.getMessage());
-        }
+        user.set(UserEntity.UserField.Password, newPassword);
+        entityStore.update(PathResolver.resource("users.csv"), username, user, "User");
     }
 
 }

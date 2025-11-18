@@ -10,6 +10,8 @@ public abstract class Controller {
     public final Scanner scanner;
     /** Router controlling controller navigation. */
     public final Router router;
+    /** Abstracted persistence gateway available to subclasses. */
+    protected final EntityStore entityStore;
 
     /**
      * Builds a controller bound to the shared router and scanner.
@@ -17,9 +19,10 @@ public abstract class Controller {
      * @param router navigation coordinator
      * @param scanner shared input stream
      */
-    public Controller(Router router,Scanner scanner){
+    public Controller(Router router, Scanner scanner, EntityStore entityStore){
         this.router = router;
         this.scanner = scanner;
+        this.entityStore = entityStore;
     }
 
     /**

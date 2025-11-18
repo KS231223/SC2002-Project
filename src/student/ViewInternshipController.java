@@ -23,8 +23,8 @@ public class ViewInternshipController extends StudentController {
      * @throws InvalidStudentIDException when {@code studentID} cannot be resolved
      */
     @SuppressWarnings("LeakingThisInConstructor")
-    public ViewInternshipController(Router router, Scanner scanner, String studentID) throws InvalidStudentIDException {
-        super(router, scanner, studentID);
+    public ViewInternshipController(Router router, Scanner scanner, EntityStore entityStore, String studentID) throws InvalidStudentIDException {
+        super(router, scanner, entityStore, studentID);
         this.display = new ViewInternshipDisplay(this);
         router.push(this);
     }
@@ -35,14 +35,14 @@ public class ViewInternshipController extends StudentController {
      */
     @Override
     public void initialize() {
-        StudentEntity student = StudentFilterService.loadStudent(studentID);
+        StudentEntity student = StudentFilterService.loadStudent(entityStore, studentID);
         if (student == null) {
             System.out.println("Unable to load student profile. Returning...");
             router.pop();
             return;
         }
 
-        List<Entity> internships = DatabaseManager.getDatabase(INTERNSHIP_FILE, new ArrayList<>(), "Internship");
+        List<Entity> internships = entityStore.loadAll(INTERNSHIP_FILE, "Internship");
         if (internships.isEmpty()) {
             System.out.println("No internships available at the moment.");
             router.pop();
