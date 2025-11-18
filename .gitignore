@@ -33,6 +33,9 @@ src/ims/StaffIntensiveScenarioMain.java
 src/ims/CRIntensiveScenarioMain.java
 src/ims/CR_SPAM_INTERN.java
 src/ims/CR_SPAM_REGISTRATION.java
+src/ims/TestStaffIntensiveMain.java
+src/ims/TestCRIntensiveMain.java
+src/ims/TestFinalBossScenarioMain.java
 src\ims\TestCRRegistrationMain.java
-sources.txt
+java_sources.txt
 sources.txt

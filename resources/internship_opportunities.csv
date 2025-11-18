@@ -1,10 +1,7 @@
 INT-2025-ACTIVE,Robotics Analytics,Advanced robotics analytics project,Advanced,CSC,2025-11-05,2026-01-10,Approved,TestCorp,test@gmail.com,5,Visible
 CR-INT-ACTIVE,Cloud Security Analyst,Secure cloud solutions internship,Advanced,CSC,2025-09-01,2025-12-31,Approved,TestCorp,test@gmail.com,2,Visible
-CR-INT-HIDDEN,Data Platform Revamp,Overhaul internal data platforms,Intermediate,CSC,2025-08-15,2025-11-30,Pending,TestCorp,test@gmail.com,3,Hidden
-INT-2025-PENDING,AI Residency,Deep research placement,Advanced,CSC,2025-11-10,2025-12-30,Pending,TestCorp,test@gmail.com,4,Hidden
-INT-2025-PENDING,AI Residency,Deep research placement,Advanced,CSC,2025-11-10,2025-12-30,Pending,TestCorp,test@gmail.com,4,Visible
-INT-2026-BASIC-UX,Campus UX Sprint,Design lightweight portals for campus services,Basic,EEE,2026-01-15,2026-03-15,Approved,BrightPixel Labs,ux.rep@brightpixel.com,3,Visible
-INT-2026-INTER-EDGE,Edge AI Toolkit,Prototype edge inference utilities with mentors,Intermediate,CSC,2025-12-01,2026-02-01,Pending,EdgeForge,talent@edgeforge.io,2,Visible
-INT-2026-BASIC-GAME,Serious Games Assistant,Support simulation scenarios for training,Basic,MAE,2025-11-20,2026-01-20,Approved,PlayWorks Studio,mentors@playworks.games,2,Visible
-INT-2026-INTER-GREEN,Sustainable Systems Analyst,Model carbon-aware facility schedules,Intermediate,CEE,2026-02-10,2026-04-05,Pending,GreenGrid Solutions,careers@greengrid.energy,4,Visible
-INT-2026-BASIC-OPS,Ops Automation Apprentice,Automate onboarding playbooks for ops team,Basic,CSC,2025-10-05,2025-12-15,Approved,NexOps Systems,hiring@nexops.systems,3,Hidden
+INT-2025-PENDING,AI Residency,Deep research placement,Advanced,CSC,2025-11-10,2025-12-30,Approved,TestCorp,test@gmail.com,4,Visible
+INT-2026-BASIC-OPS,Ops Automation Apprentice,Automate onboarding playbooks for ops team,Basic,CSC,2025-10-05,2025-12-15,Approved,NexOps Systems,hiring@nexops.systems,3,Visible
+NEX-VIS-003,Trust Automation Resident,Design trust dashboards,Basic,EEE,2025-12-01,2026-03-15,Pending,NexOps Systems,hiring@nexops.systems,3,Visible
+HYP-VIS-001,Quantum Systems Sentinel,Guard mission-critical compute,Intermediate,CSC,2025-11-01,2026-02-15,Approved,Hyperion Labs,boss.rep1@hyperion.com,3,Visible
+HYP-HID-002,Compliance Mapping Sprint,Map frameworks to pipelines,Basic,CSC,2025-10-20,2026-01-31,Approved,Hyperion Labs,boss.rep1@hyperion.com,2,Visible

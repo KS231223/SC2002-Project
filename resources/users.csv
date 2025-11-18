@@ -1,4 +1,4 @@
-U2310001A,password,student
+U2310001A,BossStudent!1,student
 U2310002B,password,student
 U2310003C,password,student
 U2310004D,password,student
@@ -10,3 +10,4 @@ test@gmail.com,password,CR
 ID1@test.com,password,CR
 nova.rep1@example.com,SecurePass1!,CR
 aurora.rep2@example.com,SecurePass2@,CR
+boss.rep1@hyperion.com,Hyperion!23,CR
