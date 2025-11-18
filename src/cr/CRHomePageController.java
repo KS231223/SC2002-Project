@@ -114,7 +114,7 @@ class CRHomeDisplay extends Display {
             System.out.println("7. Clear internship filters");
             System.out.println("8. Change password");
             System.out.println("9. Logout");
-            System.out.print("Select an option: ");
+            System.out.print("Select an option: \n");
         }
 }
 

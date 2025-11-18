@@ -50,24 +50,50 @@ public class ReviewRegistrationController extends Controller {
             return;
         }
         display.print_menu();
-        display.print_list(new ArrayList<>(pending));
-        String crId = display.get_user_input().trim();
-        CREntity selected = pending.stream()
-            .filter(cr -> cr.get(CREntity.CRField.CRID).equals(crId))
-            .findFirst()
-            .orElse(null);
+        display.print_list(pending);
+        String selection = display.get_user_input().trim();
 
-        if (selected == null) {
-            System.out.println("Invalid ID. Returning to previous menu.");
+        if (selection.equalsIgnoreCase("B")) {
+            System.out.println("Returning to previous menu.");
             router.pop();
             return;
         }
+
+        int index;
+        try {
+            index = Integer.parseInt(selection);
+        } catch (NumberFormatException ex) {
+            System.out.println("Invalid selection. Returning to previous menu.");
+            router.pop();
+            return;
+        }
+
+        if (index < 1 || index > pending.size()) {
+            System.out.println("Invalid selection. Returning to previous menu.");
+            router.pop();
+            return;
+        }
+
+        CREntity selected = pending.get(index - 1);
+        String crId = selected.get(CREntity.CRField.CRID);
         Entity userEntityToAppend = new UserEntity(
             selected.getArrayValueByIndex(0),
             selected.getArrayValueByIndex(1),
             "CR");
         display.print_entry(selected);
         String choice = display.get_user_input().trim().toUpperCase();
+
+        if (choice.equals("B")) {
+            System.out.println("Returning to previous menu.");
+            router.pop();
+            return;
+        }
+
+        if (!choice.equals("A") && !choice.equals("R")) {
+            System.out.println("Invalid selection. Returning to previous menu.");
+            router.pop();
+            return;
+        }
 
         if (choice.equals("A")) {
             entityStore.append(CR_FILE, selected);
@@ -85,6 +111,7 @@ public class ReviewRegistrationController extends Controller {
  * Display helper for the registration review flow.
  */
 class ReviewRegistrationDisplay extends Display {
+    private static final String LIST_ROW_FORMAT = "%-4s %-12s %-20s %-25s %-20s %-30s%n";
 
     /**
      * Creates a display facade for registration review.
@@ -100,7 +127,7 @@ class ReviewRegistrationDisplay extends Display {
      */
     @Override
     public void print_menu() {
-        System.out.println("Welcome! Choose Company Representative ID to Approve/Reject");
+        System.out.println("Welcome! Select a company representative registration to review.");
     }
     /**
      * Prints the selected registration entry and prompts for an approval decision.
@@ -108,14 +135,28 @@ class ReviewRegistrationDisplay extends Display {
      * @param e entity awaiting review
      */
     public void print_entry(Entity e){
-        System.out.println("\nPending: " + e.toString());
-        System.out.print("Approve (A) / Reject (R): ");
+        if (e == null) {
+            System.out.println("\nNo entry selected.");
+            return;
+        }
+        if (e instanceof CREntity cr) {
+            System.out.println("\nPending Registration Details:");
+            System.out.printf("ID: %s%n", cr.get(CREntity.CRField.CRID));
+            System.out.printf("Name: %s%n", cr.get(CREntity.CRField.Name));
+            System.out.printf("Company: %s%n", cr.get(CREntity.CRField.CompanyName));
+            System.out.printf("Department: %s%n", cr.get(CREntity.CRField.Department));
+            System.out.printf("Position: %s%n", cr.get(CREntity.CRField.Position));
+            System.out.printf("Email: %s%n", cr.get(CREntity.CRField.Email));
+        } else {
+            System.out.println("\nPending: " + e.toString());
+        }
+        System.out.print("Approve (A) / Reject (R) / Back (B): ");
     }
     /**
      * Prompts the reviewer for the identifier of a registration.
      */
     public void ask_for_id(){
-        System.out.print("Which companyID do you wish to Approve/Reject?");
+        System.out.print("Enter number to APPROVE/REJECT or B to go back: ");
 
     }
     /**
@@ -123,10 +164,21 @@ class ReviewRegistrationDisplay extends Display {
      *
      * @param entityList registrations available for review
      */
-    public void print_list(List<? extends Entity> entityList){
-        for (Entity e : entityList){
-           System.out.println(e.toString());
+    public void print_list(List<CREntity> entityList){
+        System.out.println("\nPending Company Representatives:");
+        System.out.printf(LIST_ROW_FORMAT, "No.", "CR ID", "Name", "Company", "Position", "Email");
+        for (int i = 0; i < entityList.size(); i++) {
+            CREntity cr = entityList.get(i);
+            System.out.printf(
+                LIST_ROW_FORMAT,
+                (i + 1) + ".",
+                cr.get(CREntity.CRField.CRID),
+                cr.get(CREntity.CRField.Name),
+                cr.get(CREntity.CRField.CompanyName),
+                cr.get(CREntity.CRField.Position),
+                cr.get(CREntity.CRField.Email)
+            );
         }
-        System.out.println("Which entry would you like to delete?");
+        System.out.print("\nEnter number to APPROVE/REJECT or B to go back: ");
     }
 }
