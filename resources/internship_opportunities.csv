@@ -4,6 +4,7 @@
 52489fa9-ecfc-42e9-9b54-2c7fd1be7b98,test4,test4,Basic,Computer Science,2025-11-14,2026-11-15,Pending,test,test@gmail.com,1,Hidden
 884a11f2-4f41-4114-9e98-b885b206b76e,Toilet Cleaner,Cleans Toilet,Basic,EEE,2025-11-15,2025-11-28,Pending,AH KOK PTE LTD,ID1@test.com,1,Visible
 b93b8f0c-c09d-4939-b59c-4607f506a265,Hello,hello,Basic,Computer Engineering,2025-11-04,2026-11-25,Pending,test,test@gmail.com,5,Hidden
-INT-2025-ACTIVE,Robotics Analytics,Advanced robotics analytics project,Advanced,CSC,2025-11-05,2026-01-10,Approved,TestCorp,test@gmail.com,4,Visible
+INT-2025-ACTIVE,Robotics Analytics,Advanced robotics analytics project,Advanced,CSC,2025-11-05,2026-01-10,Approved,TestCorp,test@gmail.com,5,Visible
 CR-INT-ACTIVE,Cloud Security Analyst,Secure cloud solutions internship,Advanced,CSC,2025-09-01,2025-12-31,Approved,TestCorp,test@gmail.com,2,Visible
 CR-INT-HIDDEN,Data Platform Revamp,Overhaul internal data platforms,Intermediate,CSC,2025-08-15,2025-11-30,Pending,TestCorp,test@gmail.com,3,Hidden
+INT-2025-PENDING,AI Residency,Deep research placement,Advanced,CSC,2025-11-10,2025-12-30,Pending,TestCorp,test@gmail.com,4,Hidden
