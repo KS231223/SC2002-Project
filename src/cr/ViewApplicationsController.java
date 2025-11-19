@@ -4,6 +4,9 @@ import common.*;
 import exceptions.InvalidCompanyRepIDException;
 import java.util.*;
 
+/**
+ * Controller that shows applications submitted to the CR's internships.
+ */
 public class ViewApplicationsController extends CRController {
 
     private static final String APPLICATION_FILE =
@@ -12,6 +15,15 @@ public class ViewApplicationsController extends CRController {
         PathResolver.resource("internship_opportunities.csv");
     private ViewApplicationsDisplay display;
 
+    /**
+     * Builds the controller and pushes it onto the router stack.
+     *
+     * @param router   router orchestrating controller lifecycle
+     * @param scanner  shared scanner for CLI input
+     * @param entityStore persistence gateway
+     * @param crID     current company representative ID
+     * @throws InvalidCompanyRepIDException when the CR identifier is invalid
+     */
     @SuppressWarnings("LeakingThisInConstructor")
     public ViewApplicationsController(Router router, Scanner scanner, EntityStore entityStore, String crID) throws InvalidCompanyRepIDException {
         super(router, scanner, entityStore, crID);
@@ -69,6 +81,11 @@ class ViewApplicationsDisplay extends Display {
         super(owner);
     }
 
+    /**
+     * Prints the applications matching the active filters.
+     *
+     * @param apps application entities to render
+     */
     public void print_list(List<? extends Entity> apps) {
         System.out.println("=== Internship Applications ===");
         for (Entity e : apps) {

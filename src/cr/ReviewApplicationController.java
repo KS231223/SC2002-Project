@@ -4,6 +4,9 @@ import common.*;
 import exceptions.InvalidCompanyRepIDException;
 import java.util.*;
 
+/**
+ * Controller that lets a company representative review and act on applications.
+ */
 public class ReviewApplicationController extends CRController {
     private final ReviewApplicationDisplay display;
     private static final String APPLICATION_FILE =
@@ -11,6 +14,15 @@ public class ReviewApplicationController extends CRController {
     private static final String INTERNSHIP_FILE =
         PathResolver.resource("internship_opportunities.csv");
 
+    /**
+     * Creates the controller, wiring UI helpers and pushing onto the router.
+     *
+     * @param router   navigation router managing controller stack
+     * @param scanner  shared scanner for CLI input
+     * @param entityStore persistence boundary for application data
+     * @param crID     company representative identifier
+     * @throws InvalidCompanyRepIDException when the CR identifier is invalid
+     */
     @SuppressWarnings("LeakingThisInConstructor")
     public ReviewApplicationController(Router router, Scanner scanner, EntityStore entityStore, String crID) throws InvalidCompanyRepIDException {
         super(router, scanner, entityStore, crID);
@@ -98,11 +110,21 @@ class ReviewApplicationDisplay extends Display {
         System.out.println("Select Application ID to Approve/Reject");
     }
 
+    /**
+     * Prints the selected application and prompts for an action.
+     *
+     * @param e application to display
+     */
     public void print_entry(Entity e) {
         System.out.println("\nApplication Details: " + e);
         System.out.print("Approve (A) / Reject (R): ");
     }
 
+    /**
+     * Outputs the reviewable application list and prompts for a choice.
+     *
+     * @param list applications matching the CR filters
+     */
     public void print_list(List<? extends Entity> list) {
         for (Entity e : list) {
             System.out.println(e.toString());

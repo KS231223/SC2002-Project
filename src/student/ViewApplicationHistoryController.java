@@ -4,6 +4,9 @@ import common.*;
 import exceptions.*;
 import java.util.*;
 
+/**
+ * Controller that lets a student review the complete history of applications submitted.
+ */
 public class ViewApplicationHistoryController extends StudentController {
 
     private ViewApplicationHistoryDisplay display;
@@ -12,6 +15,15 @@ public class ViewApplicationHistoryController extends StudentController {
     private static final String INTERNSHIP_FILE =
         PathResolver.resource("internship_opportunities.csv");
 
+    /**
+     * Creates the controller and registers it with the router.
+     *
+     * @param router    navigation router controlling screen stack
+     * @param scanner   shared scanner for CLI prompts
+     * @param entityStore persistence boundary for student data needs
+     * @param studentID current authenticated student identifier
+     * @throws InvalidStudentIDException when the ID fails validation
+     */
     public ViewApplicationHistoryController(Router router, Scanner scanner, EntityStore entityStore, String studentID) throws InvalidStudentIDException {
         super(router, scanner, entityStore, studentID);
         this.display = new ViewApplicationHistoryDisplay(this);
@@ -50,7 +62,9 @@ public class ViewApplicationHistoryController extends StudentController {
         router.pop();
     }
 
-    // Helper class to store application details with internship info
+    /**
+     * Helper class bundling application and internship metadata for display.
+     */
     public static class ApplicationWithDetails {
         public String applicationID;
         public String internshipID;
@@ -85,6 +99,11 @@ class ViewApplicationHistoryDisplay extends Display {
     @Override
     public void print_menu() {}
 
+    /**
+     * Renders the full application history for the current student.
+     *
+     * @param applications resolved application list enriched with internship data
+     */
     public void print_list(List<ViewApplicationHistoryController.ApplicationWithDetails> applications) {
         System.out.println("=== Application History ===");
         if (applications.isEmpty()) {

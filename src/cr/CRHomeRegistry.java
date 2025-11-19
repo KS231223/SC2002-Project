@@ -1,15 +1,29 @@
 package cr;
 import common.*;
-
+import exceptions.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
-import exceptions.*;
 
+/**
+ * Registry that maps company representative home-page menu choices to the
+ * appropriate controller constructors.
+ */
 public class CRHomeRegistry implements ControllerFactory {
 
+    /**
+     * Mapping of option key to controller supplier.
+     */
     public Map<String, ControllerSupplier> keyMap = new HashMap<>();
 
+    /**
+     * Builds the registry for a specific CR session.
+     *
+     * @param router  navigation router used to push controllers
+     * @param scanner shared scanner for interactive input
+     * @param store   entity store for persistence operations
+     * @param userID  company representative identifier
+     */
     public CRHomeRegistry(Router router, Scanner scanner, EntityStore store, String userID) {
         keyMap.put("1", () -> new ListMyInternshipsController(router, scanner, store, userID));
         keyMap.put("2", () -> new CreateInternshipController(router, scanner, store, userID));
@@ -21,6 +35,12 @@ public class CRHomeRegistry implements ControllerFactory {
     }
 
     @Override
+    /**
+     * Instantiates the controller paired with the provided CR menu key.
+     *
+     * @param key action selected on the CR home screen
+     * @throws IllegalArgumentException when no controller is mapped to the key
+     */
     public void createController(String key){
         ControllerSupplier supplier = keyMap.get(key);
         if (supplier == null) {

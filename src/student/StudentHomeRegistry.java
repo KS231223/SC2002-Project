@@ -6,10 +6,21 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
+/**
+ * Registry that maps student home-page menu selections to controller factories.
+ */
 public class StudentHomeRegistry implements ControllerFactory {
 
     private final Map<String, ControllerSupplier> keyMap = new HashMap<>();
 
+    /**
+     * Wires student actions to their corresponding controllers.
+     *
+     * @param router   router managing controller stack
+     * @param scanner  shared CLI scanner
+     * @param store    student-facing entity store
+     * @param studentID current student identifier
+     */
     public StudentHomeRegistry(Router router, Scanner scanner, EntityStore store, String studentID) {
         keyMap.put("1", () -> new ViewInternshipController(router, scanner, store, studentID));
         keyMap.put("2", () -> new UpdateInternshipFiltersController(router, scanner, store, studentID));
@@ -21,6 +32,12 @@ public class StudentHomeRegistry implements ControllerFactory {
     }
 
     @Override
+    /**
+     * Instantiates the controller associated with the supplied menu key.
+     *
+     * @param key student home option entered by the user
+     * @throws IllegalArgumentException when the key has no mapping
+     */
     public void createController(String key) {
         ControllerSupplier supplier = keyMap.get(key);
         if (supplier == null) {

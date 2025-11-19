@@ -3,16 +3,28 @@ package ims;
 import common.*;
 import cr.*;
 import exceptions.*;
-import staff.*;
-import student.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
+import staff.*;
+import student.*;
 
+/**
+ * Registry used at login time to route users with different roles to the
+ * matching home-page controller.
+ */
 public class LoginRegistry implements ControllerFactory {
 
     private final Map<String, ControllerSupplier> keyMap = new HashMap<>();
 
+    /**
+     * Configures the registry with handlers for each supported role.
+     *
+     * @param router  router managing controller navigation
+     * @param scanner shared CLI scanner
+     * @param store   backing entity store
+     * @param userID  identifier of the authenticated user
+     */
     public LoginRegistry(Router router, Scanner scanner, EntityStore store, String userID) {
         // Map roles to controller creation
         keyMap.put("student", () -> new StudentHomePageController(router, scanner, store, userID));
@@ -23,8 +35,13 @@ public class LoginRegistry implements ControllerFactory {
 
 
 
-
     @Override
+    /**
+     * Instantiates the home controller mapped to the provided role.
+     *
+     * @param role canonicalized user role (student/cr/staff)
+     * @throws IllegalArgumentException when the role is unknown
+     */
     public void createController(String role) {
         ControllerSupplier supplier = keyMap.get(role);
         if (supplier == null) {

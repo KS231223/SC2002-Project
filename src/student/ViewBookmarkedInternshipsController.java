@@ -4,6 +4,9 @@ import common.*;
 import exceptions.*;
 import java.util.*;
 
+/**
+ * Controller that lets a student browse internships previously bookmarked.
+ */
 public class ViewBookmarkedInternshipsController extends StudentController {
 
     private ViewBookmarkedInternshipsDisplay display;
@@ -12,6 +15,15 @@ public class ViewBookmarkedInternshipsController extends StudentController {
     private static final String INTERNSHIP_FILE =
         PathResolver.resource("internship_opportunities.csv");
 
+    /**
+     * Creates the controller and attaches it to the router stack.
+     *
+     * @param router    router managing controller transitions
+     * @param scanner   shared scanner for CLI input
+     * @param entityStore persistence gateway
+     * @param studentID current student identifier
+     * @throws InvalidStudentIDException when the student ID fails validation
+     */
     public ViewBookmarkedInternshipsController(Router router, Scanner scanner, EntityStore entityStore, String studentID) throws InvalidStudentIDException {
         super(router, scanner, entityStore, studentID);
         this.display = new ViewBookmarkedInternshipsDisplay(this);
@@ -52,6 +64,11 @@ class ViewBookmarkedInternshipsDisplay extends Display {
     @Override
     public void print_menu() {}
 
+    /**
+     * Renders bookmarked internships in order.
+     *
+     * @param internships internships resolved from the bookmark list
+     */
     public void print_list(List<Entity> internships) {
         System.out.println("=== My Bookmarked Internships ===");
         if (internships.isEmpty()) {
